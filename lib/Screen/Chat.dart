@@ -60,8 +60,7 @@ class _ChatState extends State<Chat> {
 
   static void downloadCallback(
       String id, DownloadTaskStatus status, int progress) {
-    final SendPort send =
-        IsolateNameServer.lookupPortByName('downloader_send_port')!;
+    final SendPort send = IsolateNameServer.lookupPortByName('downloader_send_port')!;
     send.send([id, status, progress]);
   }
 
@@ -80,13 +79,15 @@ class _ChatState extends State<Chat> {
     chatstreamdata!.stream.listen((response) {
       setState(() {
         final res = json.decode(response);
+        print("responseeeee ${res["data"]['message']}");
         Model message;
+        Map<String, dynamic> data =  res["data"];
         String mid;
-
-        message = Model.fromChat(res["data"]);
+        message = Model.fromJson(data);
+        print("maesssasanseeeee ${message.userFrom}");
 
         chatList.insert(0, message);
-        files.clear();
+        // files.clear();
       });
     });
   }
@@ -102,7 +103,7 @@ class _ChatState extends State<Chat> {
       child: ListView.builder(
         padding: EdgeInsets.all(10.0),
         itemBuilder: (context, index) => msgItem(index, chatList[index]),
-        itemCount: chatList.length,
+        itemCount: chatList.length ?? 0,
         reverse: true,
         controller: _scrollController,
       ),
@@ -110,7 +111,7 @@ class _ChatState extends State<Chat> {
   }
 
   Widget msgItem(int index, Model message) {
-    if (message.uid == context.read<SettingProvider>().userId) {
+    if (message.userFrom == context.read<SettingProvider>().userId) {
       //Own message
       return Row(
         mainAxisAlignment: MainAxisAlignment.end,
@@ -150,11 +151,11 @@ class _ChatState extends State<Chat> {
         Provider.of<SettingProvider>(this.context, listen: false);
     return Column(
       mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: message.uid == settingsProvider.userId
+      crossAxisAlignment: message.userFrom == settingsProvider.userId
           ? CrossAxisAlignment.end
           : CrossAxisAlignment.start,
       children: <Widget>[
-        message.uid == settingsProvider.userId
+        message.userFrom == settingsProvider.userId
             ? Container()
             : Padding(
                 padding: EdgeInsets.only(top: 10),
@@ -170,12 +171,12 @@ class _ChatState extends State<Chat> {
                     //   height: 25,
                     //   fit: BoxFit.cover,
                     // )),
-                    Padding(
-                      padding: EdgeInsets.only(left: 5.0),
-                      child: Text(capitalize(message.name!),
-                          style:
-                              TextStyle(color: colors.primary, fontSize: 12)),
-                    )
+                    // Padding(
+                    //   padding: EdgeInsets.only(left: 5.0),
+                    //   child: Text(capitalize(message.name ?? ''),
+                    //       style:
+                    //           TextStyle(color: colors.primary, fontSize: 12)),
+                    // )
                   ],
                 ),
               ),
@@ -183,29 +184,29 @@ class _ChatState extends State<Chat> {
             itemBuilder: (context, index) {
               return attachItem(message.attach!, index, message);
             },
-            itemCount: message.attach!.length,
+            itemCount: message.attach?.length ?? 0,
             physics: NeverScrollableScrollPhysics(),
             shrinkWrap: true),
-        message.msg != null && message.msg!.isNotEmpty
+        message.message != null
             ? Card(
                 elevation: 0.0,
-                color: message.uid == settingsProvider.userId
+                color: message.userFrom == settingsProvider.userId
                     ? Theme.of(context).colorScheme.fontColor.withOpacity(0.1)
                     : Theme.of(context).colorScheme.white,
                 child: Padding(
                   padding:
                       const EdgeInsets.symmetric(horizontal: 10.0, vertical: 5),
                   child: Column(
-                    crossAxisAlignment: message.uid == settingsProvider.userId
+                    crossAxisAlignment: message.userFrom == settingsProvider.userId
                         ? CrossAxisAlignment.end
                         : CrossAxisAlignment.start,
                     children: <Widget>[
-                      Text("${message.msg}",
+                      Text("${message.message}",
                           style: TextStyle(
                               color: Theme.of(context).colorScheme.black)),
                       Padding(
                         padding: const EdgeInsetsDirectional.only(top: 5),
-                        child: Text(message.date!,
+                        child: Text(message.createdAt ?? '',
                             style: TextStyle(
                                 color: Theme.of(context).colorScheme.lightBlack,
                                 fontSize: 9)),
@@ -214,7 +215,7 @@ class _ChatState extends State<Chat> {
                   ),
                 ),
               )
-            : Container(),
+            : Text("No Message"),
       ],
     );
   }
@@ -318,8 +319,8 @@ class _ChatState extends State<Chat> {
     var request = http.MultipartRequest("POST", sendMsgApi);
     request.headers.addAll(headers);
     request.fields[USER_ID] = settingsProvider.userId!;
-    request.fields[TICKET_ID] = widget.id!;
-    request.fields[USER_TYPE] = USER;
+    // request.fields[TICKET_ID] = widget.id!;
+    // request.fields[USER_TYPE] = USER;
     request.fields[MESSAGE] = message;
 
     if (files != null) {
@@ -333,6 +334,7 @@ class _ChatState extends State<Chat> {
     var responseData = await response.stream.toBytes();
     var responseString = String.fromCharCodes(responseData);
     var getdata = json.decode(responseString);
+    print("chattttttttttt ${responseString}");
     bool error = getdata["error"];
     String? msg = getdata['message'];
     var data = getdata["data"];
@@ -344,22 +346,20 @@ class _ChatState extends State<Chat> {
   Future<void> getMsg() async {
     try {
       var data = {
-        TICKET_ID: widget.id,
+          "user_id": CUR_USERID,
       };
 
-      Response response = await post(getMsgApi, body: data, headers: headers)
-          .timeout(Duration(seconds: timeOut));
-
+      Response response = await post(getMsgApi, body: data, headers: headers).timeout(Duration(seconds: timeOut));
       if (response.statusCode == 200) {
         var getdata = json.decode(response.body);
-
+           print("rersrsr ${response.body}");
         bool error = getdata["error"];
         String? msg = getdata["message"];
-
         if (!error) {
           var data = getdata["data"];
           chatList =
-              (data as List).map((data) => new Model.fromChat(data)).toList();
+              (data as List).map((data) => new Model.fromJson(data)).toList();
+          print("chattt msgggg ${chatList.length}");
         } else {
           if (msg != "Ticket Message(s) does not exist") setSnackbar(msg!);
         }

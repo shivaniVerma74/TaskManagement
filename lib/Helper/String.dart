@@ -11,6 +11,13 @@ final Uri taskList = Uri.parse(baseUrl + 'task_list');
 final Uri taskCounts = Uri.parse(baseUrl + 'task_counts');
 final Uri punchsIn = Uri.parse(baseUrl + 'punch_in');
 final Uri punchsOut = Uri.parse(baseUrl + 'punch_out');
+final Uri addComment = Uri.parse(baseUrl + 'comment');
+final Uri getTermCondition = Uri.parse(baseUrl + 'get_terms_conditions');
+final Uri getPrivacyPolicy = Uri.parse(baseUrl + 'get_privacy_policy');
+final Uri addFile = Uri.parse(baseUrl + 'add_file');
+final Uri updatePrfile = Uri.parse(baseUrl + 'update_profile');
+final Uri marquee = Uri.parse(baseUrl + 'get_marquee');
+final Uri getFiles = Uri.parse(baseUrl + 'get_files');
 
 final Uri getSectionApi = Uri.parse(baseUrl + 'get_sections');
 final Uri getSettingApi = Uri.parse(baseUrl + 'get_settings');
@@ -57,8 +64,11 @@ final Uri getAddressApi = Uri.parse(baseUrl + 'get_address');
 final Uri deleteAddressApi = Uri.parse(baseUrl + "delete_address");
 final Uri getResetPassApi = Uri.parse(baseUrl + 'reset_password');
 final Uri getCitiesApi = Uri.parse(baseUrl + 'get_cities');
+final Uri getProfile = Uri.parse(baseUrl + 'get_profile');
+final Uri updateTaskStatus = Uri.parse(baseUrl + 'update_task');
 final Uri getAreaByCityApi = Uri.parse(baseUrl + 'get_areas_by_city_id');
 final Uri getUpdateUserApi = Uri.parse(baseUrl + 'update_user');
+final Uri changePassword = Uri.parse(baseUrl + 'change_password');
 final Uri getAddAddressApi = Uri.parse(baseUrl + 'add_address');
 final Uri updateAddressApi = Uri.parse(baseUrl + 'update_address');
 final Uri placeOrderApi = Uri.parse(baseUrl + 'place_order');
@@ -85,8 +95,7 @@ final Uri flutterwaveApi = Uri.parse(baseUrl + 'flutterwave_webview');
 final Uri getMsgApi = Uri.parse(baseUrl + 'get_messages');
 final Uri setBankProofApi = Uri.parse(baseUrl + 'send_bank_transfer_proof');
 final Uri checkDeliverableApi = Uri.parse(baseUrl + "is_product_delivarable");
-final Uri checkCartDelApi =
-Uri.parse(baseUrl + 'check_cart_products_delivarable');
+final Uri checkCartDelApi = Uri.parse(baseUrl + 'check_cart_products_delivarable');
 
 final String ISFIRSTTIME = 'isfirst$appName';
 final String HISTORYLIST = '$appName+historyList';

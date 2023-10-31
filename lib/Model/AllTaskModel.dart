@@ -1,18 +1,18 @@
-class TaskListModel {
+class AllTaskModel {
   bool? error;
   String? message;
   String? totalTasks;
-  List<TaskData>? data;
+  List<TaskDataList>? data;
 
-  TaskListModel({this.error, this.message, this.totalTasks, this.data});
+  AllTaskModel({this.error, this.message, this.totalTasks, this.data});
 
-  TaskListModel.fromJson(Map<String, dynamic> json) {
+  AllTaskModel.fromJson(Map<String, dynamic> json) {
     error = json['error'];
     message = json['message'];
     totalTasks = json['total_tasks'];
     if (json['data'] != null) {
-      data = <TaskData>[];
-      json['data'].forEach((v) { data!.add(new TaskData.fromJson(v)); });
+      data = <TaskDataList>[];
+      json['data'].forEach((v) { data!.add(new TaskDataList.fromJson(v)); });
     }
   }
 
@@ -28,7 +28,7 @@ class TaskListModel {
   }
 }
 
-class TaskData {
+class TaskDataList {
   String? id;
   String? workspaceId;
   String? projectId;
@@ -46,75 +46,72 @@ class TaskData {
   String? commentCount;
   String? startDate;
   String? dateCreated;
-  String? updateStatus;
   List<Comments>? comments;
   List<TaskFile>? file;
   String? taskCreator;
   List<String>? users;
 
-  TaskData({this.id, this.workspaceId, this.projectId, this.userId, this.milestoneId,
-  this.title, this.description, this.priority, this.taskType, this.dueDate, this.status, this.createdBy, this.assignedTo, this.class1, this.commentCount, this.startDate, this.dateCreated, this.comments, this.file, this.taskCreator, this.users});
+  TaskDataList({this.id, this.workspaceId, this.projectId, this.userId, this.milestoneId,
+    this.title, this.description, this.priority, this.taskType, this.dueDate, this.status, this.createdBy, this.assignedTo, this.class1, this.commentCount, this.startDate, this.dateCreated, this.comments, this.file, this.taskCreator, this.users});
 
-  TaskData.fromJson(Map<String, dynamic> json) {
-  id = json['id'];
-  workspaceId = json['workspace_id'];
-  projectId = json['project_id'];
-  userId = json['user_id'];
-  milestoneId = json['milestone_id'];
-  title = json['title'];
-  description = json['description'];
-  priority = json['priority'];
-  taskType = json['task_type'];
-  dueDate = json['due_date'];
-  status = json['status'];
-  createdBy = json['created_by'];
-  assignedTo = json['assigned_to'];
-  class1 = json['class'];
-  updateStatus = json['update_status'];
-  commentCount = json['comment_count'];
-  startDate = json['start_date'];
-  dateCreated = json['date_created'];
-  if (json['comments'] != null) {
-  comments = <Comments>[];
-  json['comments'].forEach((v) { comments!.add(new Comments.fromJson(v)); });
-  }
-  if (json['file'] != null) {
-  file = <TaskFile>[];
-  json['file'].forEach((v) { file!.add(new TaskFile.fromJson(v)); });
-  }
-  taskCreator = json['task_creator'];
-  users = json['users'].cast<String>();
+  TaskDataList.fromJson(Map<String, dynamic> json) {
+    id = json['id'];
+    workspaceId = json['workspace_id'];
+    projectId = json['project_id'];
+    userId = json['user_id'];
+    milestoneId = json['milestone_id'];
+    title = json['title'];
+    description = json['description'];
+    priority = json['priority'];
+    taskType = json['task_type'];
+    dueDate = json['due_date'];
+    status = json['status'];
+    createdBy = json['created_by'];
+    assignedTo = json['assigned_to'];
+    class1 = json['class'];
+    commentCount = json['comment_count'];
+    startDate = json['start_date'];
+    dateCreated = json['date_created'];
+    if (json['comments'] != null) {
+      comments = <Comments>[];
+      json['comments'].forEach((v) { comments!.add(new Comments.fromJson(v)); });
+    }
+    if (json['file'] != null) {
+      file = <TaskFile>[];
+      json['file'].forEach((v) { file!.add(new TaskFile.fromJson(v)); });
+    }
+    taskCreator = json['task_creator'];
+    users = json['users'].cast<String>();
   }
 
   Map<String, dynamic> toJson() {
-  final Map<String, dynamic> data = new Map<String, dynamic>();
-  data['id'] = this.id;
-  data['workspace_id'] = this.workspaceId;
-  data['project_id'] = this.projectId;
-  data['user_id'] = this.userId;
-  data['milestone_id'] = this.milestoneId;
-  data['title'] = this.title;
-  data['description'] = this.description;
-  data['priority'] = this.priority;
-  data['task_type'] = this.taskType;
-  data['due_date'] = this.dueDate;
-  data['status'] = this.status;
-  data['created_by'] = this.createdBy;
-  data['assigned_to'] = this.assignedTo;
-  data['class'] = this.class1;
-  data['comment_count'] = this.commentCount;
-  data['start_date'] = this.startDate;
-  data['date_created'] = this.dateCreated;
-  data['update_status'] = this.updateStatus;
-  if (this.comments != null) {
-  data['comments'] = this.comments!.map((v) => v.toJson()).toList();
-  }
-  if (this.file != null) {
-  data['file'] = this.file!.map((v) => v.toJson()).toList();
-  }
-  data['task_creator'] = this.taskCreator;
-  data['users'] = this.users;
-  return data;
+    final Map<String, dynamic> data = new Map<String, dynamic>();
+    data['id'] = this.id;
+    data['workspace_id'] = this.workspaceId;
+    data['project_id'] = this.projectId;
+    data['user_id'] = this.userId;
+    data['milestone_id'] = this.milestoneId;
+    data['title'] = this.title;
+    data['description'] = this.description;
+    data['priority'] = this.priority;
+    data['task_type'] = this.taskType;
+    data['due_date'] = this.dueDate;
+    data['status'] = this.status;
+    data['created_by'] = this.createdBy;
+    data['assigned_to'] = this.assignedTo;
+    data['class'] = this.class1;
+    data['comment_count'] = this.commentCount;
+    data['start_date'] = this.startDate;
+    data['date_created'] = this.dateCreated;
+    if (this.comments != null) {
+      data['comments'] = this.comments!.map((v) => v.toJson()).toList();
+    }
+    if (this.file != null) {
+      data['file'] = this.file!.map((v) => v.toJson()).toList();
+    }
+    data['task_creator'] = this.taskCreator;
+    data['users'] = this.users;
+    return data;
   }
 }
 

@@ -5,6 +5,7 @@ import 'dart:math';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:intl/intl.dart';
+import 'package:marquee/marquee.dart';
 import 'package:omega_employee_management/Model/category_model.dart';
 import 'package:omega_employee_management/Screen/My_Wallet.dart';
 import 'package:omega_employee_management/Screen/TaskDetails.dart';
@@ -40,6 +41,9 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:version/version.dart';
+import '../Model/AllTaskModel.dart';
+import '../Model/GetMarqueeModel.dart';
+import '../Model/PunchInModel.dart';
 import '../Model/TaskCountModel.dart';
 import '../Model/TaskListModel.dart';
 import 'Login.dart';
@@ -84,22 +88,24 @@ class _HomePageState extends State<HomePage>
 
   List<TaskData> taskdata = [];
 
+
   String? catId;
+
   setCatid() async {
     SharedPreferences pref = await SharedPreferences.getInstance();
-    pref.setString('cat_id',catId!);
+    pref.setString('cat_id', catId!);
     print('helllllo cat Iddddd${catId}');
-
   }
 
-  getTaskList() async{
+  getTaskList(String status) async {
     var headers = {
       'Cookie': 'ci_session=6925127e3cda4d5e8697170118da52825eb4e2e2'
     };
     var request = http.MultipartRequest('POST', Uri.parse(taskList.toString()));
     request.fields.addAll({
-      USER_ID: '32',
-      "current_date": "2023-10-14"
+    "user_id": "${CUR_USERID}",
+    // status == "0" || status == "1" ? "" : "current_date": "${formattedDate}",
+    "filter_by":"${status}"
     });
 
     print("this is refer request ${request.fields.toString()}");
@@ -120,7 +126,7 @@ class _HomePageState extends State<HomePage>
   }
 
 
-  getUserCheckInStatus() async{
+  getUserCheckInStatus() async {
     var headers = {
       // 'Token': jwtToken.toString(),
       // 'Authorisedkey': authKey.toString(),
@@ -129,13 +135,9 @@ class _HomePageState extends State<HomePage>
     var request = http.MultipartRequest('POST', Uri.parse(getUserCheckStatusApi.toString()));
     request.fields.addAll({
       USER_ID: '$CUR_USERID',
-      // 'status' : status.toString()
-      // categoryValue != null ?
-      //     categoryValue.toString() : ""
     });
     print("this is refer request ${request.fields.toString()}");
     request.headers.addAll(headers);
-
     http.StreamedResponse response = await request.send();
     if (response.statusCode == 200) {
       String str = await response.stream.bytesToString();
@@ -144,15 +146,6 @@ class _HomePageState extends State<HomePage>
      setState(() {
        isCheckedIn = status;
      });
-      // var finalResponse = GetUserExpensesModel.fromJson(result);
-      // setState(() {
-      //   userExpenses = finalResponse.data!;
-      // });
-      // print("this is referral data ${userExpenses.length}");
-      // setState(() {
-      // animalList = finalResponse.data!;
-      // });
-      // print("this is operator list ----->>>> ${operatorList[0].name}");
     }
     else {
       print(response.reasonPhrase);
@@ -163,13 +156,12 @@ class _HomePageState extends State<HomePage>
   void initState() {
     super.initState();
     convertDateTimeDispla();
+    showText();
     taskCount();
-    getTaskList();
+    getTaskList("");
     callApi();
-    setCatid();
-    buttonController = new AnimationController(
-        duration: new Duration(milliseconds: 2000), vsync: this);
-
+    // setCatid();
+    buttonController = new AnimationController(duration: new Duration(milliseconds: 2000), vsync: this);
     buttonSqueezeanimation = new Tween(
       begin: deviceWidth! * 0.7,
       end: 50.0,
@@ -181,101 +173,10 @@ class _HomePageState extends State<HomePage>
         ),
       ),
     );
-
     WidgetsBinding.instance.addPostFrameCallback((_) => _animateSlider());
   }
-  // subCatItem(List<Product> subList, int index, BuildContext context) {
-  //   return GestureDetector(
-  //     child: Column(
-  //       children: <Widget>[
-  //         Expanded(
-  //             child: Card(
-  //               elevation: 4,
-  //               shape:
-  //               RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-  //               child: Container(
-  //                 decoration: BoxDecoration(
-  //                     borderRadius: BorderRadius.circular(15),
-  //                     image: DecorationImage(
-  //                         fit: BoxFit.contain,
-  //                         image: NetworkImage('${subList[index].image!}'))),
-  //                 // child: FadeInImage(
-  //                 //   image: CachedNetworkImageProvider(subList[index].image!),
-  //                 //   fadeInDuration: Duration(milliseconds: 150),
-  //                 //   fit: BoxFit.cover,
-  //                 //   imageErrorBuilder: (context, error, stackTrace) =>
-  //                 //       erroWidget(50),
-  //                 //   placeholder: placeHolder(50),
-  //                 // ),
-  //               ),
-  //             )),
-  //         Text(
-  //           subList[index].name! + "\n",
-  //           textAlign: TextAlign.center,
-  //           maxLines: 2,
-  //           overflow: TextOverflow.ellipsis,
-  //           style: Theme.of(context)
-  //               .textTheme
-  //               .caption!
-  //               .copyWith(color: Theme.of(context).colorScheme.fontColor),
-  //         )
-  //       ],
-  //     ),
-  //     onTap: () {
-  //       Navigator.push(context, MaterialPageRoute(builder: (context) => ReferForm()));
-  //       // if (context.read<CategoryProvider>().curCat == 0 &&
-  //       //     popularList.length > 0) {
-  //       //   if (popularList[index].subList == null ||
-  //       //       popularList[index].subList!.length == 0) {
-  //       //     Navigator.push(
-  //       //         context,
-  //       //         MaterialPageRoute(
-  //       //           builder: (context) => ProductList(
-  //       //             name: popularList[index].name,
-  //       //             id: popularList[index].id,
-  //       //             tag: false,
-  //       //             fromSeller: false,
-  //       //           ),
-  //       //         ));
-  //       //   } else {
-  //       //
-  //       //     Navigator.push(
-  //       //         context,
-  //       //         MaterialPageRoute(
-  //       //           builder: (context) => SubCategory(
-  //       //             subList: popularList[index].subList,
-  //       //             title: popularList[index].name ?? "",
-  //       //             catId: popularList[index].id,
-  //       //           ),
-  //       //         ));
-  //       //   }
-  //       // } else if (subList[index].subList == null ||
-  //       //     subList[index].subList!.length == 0) {
-  //       //   print(StackTrace.current);
-  //       //   Navigator.push(
-  //       //       context,
-  //       //       MaterialPageRoute(
-  //       //         builder: (context) => ProductList(
-  //       //           name: subList[index].name,
-  //       //           id: subList[index].id,
-  //       //           tag: false,
-  //       //           fromSeller: false,
-  //       //         ),
-  //       //       ));
-  //       // } else {
-  //       //   print(StackTrace.current);
-  //       //   Navigator.push(
-  //       //       context,
-  //       //       MaterialPageRoute(
-  //       //         builder: (context) => SubCategory(
-  //       //           subList: subList[index].subList,
-  //       //           title: subList[index].name ?? "",
-  //       //         ),
-  //       //       ));
-  //       // }
-  //     },
-  //   );
-  // }
+
+
 
 
   TaskCountModel? taskCountModel;
@@ -285,7 +186,7 @@ class _HomePageState extends State<HomePage>
     };
     var request = http.MultipartRequest('POST', Uri.parse(taskCounts.toString()));
     request.fields.addAll({
-      'user_id': '32'
+      'user_id': '${CUR_USERID}'
     });
 
     request.headers.addAll(headers);
@@ -297,14 +198,15 @@ class _HomePageState extends State<HomePage>
       setState(() {
         taskCountModel = finalResponse;
       });
-      print("this is category data ${taskCountModel?.data?.allTasks}");
+      print("this is task count data ${taskCountModel?.data?.allTasks}");
     }
     else {
       print(response.reasonPhrase);
     }
   }
 
-  punchIn() async {
+  PunchInModel? punchInModel;
+  punchIn(Status) async {
     var headers = {
       'Cookie': 'ci_session=c7229fd981f7b63597f01b3b6b126ef924a184d8'
     };
@@ -312,13 +214,22 @@ class _HomePageState extends State<HomePage>
     request.fields.addAll({
       'user_id': '${CUR_USERID}',
       'check_in': '${timeData}',
-      'date': '${formattedDate}'
+      'date': '${formattedDate}',
+      'status': "${Status}"
     });
+    print("punch in parameter ${request.fields}");
     request.headers.addAll(headers);
     http.StreamedResponse response = await request.send();
     if (response.statusCode == 200) {
-      print(await response.stream.bytesToString());
-      Fluttertoast.showToast(msg: "Punch In Successfully");
+      String str = await response.stream.bytesToString();
+      var result = json.decode(str);
+      // bool status = result['data'];
+      var finalResponse = PunchInModel.fromJson(result);
+      print("punch in paratetet ${finalResponse}");
+      setState(() {
+        // isCheckedIn = status;
+        punchInModel = finalResponse;
+      });
     }
     else {
       print(response.reasonPhrase);
@@ -336,52 +247,174 @@ class _HomePageState extends State<HomePage>
       'check_out': '${timeData}',
       'date': '${formattedDate}'
     });
+    print("punch  parameter ${request.fields}");
     request.headers.addAll(headers);
     http.StreamedResponse response = await request.send();
     if (response.statusCode == 200) {
-      print(await response.stream.bytesToString());
-      Fluttertoast.showToast(msg: "Punch Out Successfully");
+      var finalResult = await response.stream.bytesToString();
+      print(finalResult);
+      final jsonResponse = json.decode(finalResult);
+      print("check in responsee ${jsonResponse}");
+      setState(() {
+        Fluttertoast.showToast(msg: "${jsonResponse['message']}");
+      });
     }
     else {
       print(response.reasonPhrase);
     }
   }
 
+  String? monthly;
+  var monthlyitem = [
+    'On Leave',
+    'Weekly Off',
+    'Holiday',
+    'Compensatory Holiday',
+    'OnDuty'
+  ];
+
+  monthlyDialog() {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          content: SingleChildScrollView(
+            child: ListBody(
+              children: <Widget>[
+                Card(
+                  elevation: 3,
+                  child: DropdownButtonFormField<String>(
+                    value: monthly,
+                    onChanged: (String? newValue) {
+                      setState(() {
+                        monthly = newValue!;
+                        print("printttttt statusss ${monthly}");
+                      });
+                    },
+                    items: monthlyitem.map((String avaliableitem) {
+                      return DropdownMenuItem(
+                        value: avaliableitem,
+                        child: Text(avaliableitem.toString()),
+                      );
+                    }).toList(),
+                    decoration:  InputDecoration(
+                      border: InputBorder.none,
+                      hintText: getTranslated(context, 'STATUS')!,
+                      filled: true,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: Text(getTranslated(context, 'CANCEL')!,
+                style: Theme.of(this.context).textTheme.subtitle2!.copyWith(
+                    color: Theme.of(context).colorScheme.lightBlack,
+                    fontWeight: FontWeight.bold)),
+                onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+               child:  Text(getTranslated(context, 'CONFIRM')!,
+                style: Theme.of(this.context).textTheme.subtitle2!.copyWith(
+                color: Theme.of(context).colorScheme.lightBlack,
+                fontWeight: FontWeight.bold)),
+                onPressed: () {
+                setState(() {});
+                punchIn(monthly.toString());
+                // getDoctors();
+                // Navigator.of(context).pop();
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+  GetMarqueeModel? getMarquees;
+  showText() async {
+    var headers = {
+      'Cookie': 'ci_session=5b215957bb736c35a972b388befa5f833174bab0'
+    };
+    var request = http.Request('GET', Uri.parse('${baseUrl}get_marquee'));
+
+    request.headers.addAll(headers);
+    http.StreamedResponse response = await request.send();
+
+    if (response.statusCode == 200) {
+      var Response = await response.stream.bytesToString();
+      final finalResponse = GetMarqueeModel.fromJson(json.decode(Response));
+      setState(() {
+        getMarquees = finalResponse;
+        print('This is Marquee Text${getMarquees}');
+      });
+    } else {
+      print(response.reasonPhrase);
+    }
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      // floatingActionButton: Container(
+      //   // key: whatsapppBoxKey,
+      //   height: 65.0,
+      //   width: 65.0,
+      //   child: FloatingActionButton(
+      //     backgroundColor: colors.primary ,
+      //     onPressed: () {
+      //       monthlyDialog();
+      //     },
+      //     child: Text("Monthly", style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.white),)
+      //   ),
+      // ),
       bottomSheet: Padding(
-        padding: const EdgeInsets.only(left: 10.0, right: 10),
+        padding:  EdgeInsets.only(left: 10.0, right: 10),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
+            if (!isCheckedIn)
             ElevatedButton(
               onPressed: () async {
-              var result = await   Navigator.push(context, MaterialPageRoute(builder: (context)=> CheckInScreen()));
-              if(result != null){
+                // punchIn();
                 setState(() {
-                  punchIn();
+                  isCheckedIn = true;
                 });
-              }
-              }, child: Text("PUNCH-IN",
+                monthlyDialog();
+                // var result = await   Navigator.push(context, MaterialPageRoute(builder: (context)=> CheckInScreen()));
+              // if(result != null){
+              //   setState(() {
+              //     punchIn();
+              //   });
+              // }
+              }, child: Text(getTranslated(context, 'PUNCHIN')!,
               ),
-            style: ElevatedButton.styleFrom(
+              style: ElevatedButton.styleFrom(
               elevation: 0,
               shape: StadiumBorder(),
               fixedSize: Size(150, 40),
-              backgroundColor: colors.blackTemp.withOpacity(0.8)
-            ),),
-            SizedBox(width: 20,),
-            ElevatedButton(onPressed: (){
+              backgroundColor: colors.blackTemp.withOpacity(0.8))),
+            SizedBox(width: 10),
+            if (isCheckedIn)
+            ElevatedButton(
+              onPressed: () {
               punchOut();
+              setState(() {
+                isCheckedIn = false;
+              });
               // Navigator.push(context, MaterialPageRoute(builder: (context)=> CheckOutScreen()));
-            }, child: Text("PUNCH-OUT"),
+            }, child: Text(getTranslated(context, 'PUNCHOUT')!),
               style: ElevatedButton.styleFrom(
                   elevation: 0,
                   shape: StadiumBorder(),
                   fixedSize: Size(150, 40),
                   backgroundColor: colors.blackTemp.withOpacity(0.8)
-              ),),
+              ),
+            ),
           ],
         ),
       ),
@@ -409,17 +442,90 @@ class _HomePageState extends State<HomePage>
       // ),
       body: _isNetworkAvail
           ? RefreshIndicator(
-        color: colors.primary,
-        key: _refreshIndicatorKey,
-        onRefresh: _refresh,
-        child: SingleChildScrollView(
+          color: colors.primary,
+          key: _refreshIndicatorKey,
+          onRefresh: _refresh,
+          child: SingleChildScrollView(
           child: Padding(
             padding: const EdgeInsets.only(bottom: 15),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.start,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                getMarquees?.data?.status == "1"
+                    ? Container(
+                        height: 40,
+                        width: MediaQuery.of(context).size.width,
+                        color: colors.primary,
+                        child: Marquee(
+                          text: '${getMarquees!.data?.title}',
+                          velocity: 50,
+                          scrollAxis: Axis.horizontal,
+                          blankSpace: 20,
+                          style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.w500,
+                              color: colors.whiteTemp),
+                        )):
+                // getMarquees?.data?.status == "1" ?
+                // Container(
+                //   height: 30,
+                //   color: Colors.red,
+                //   child: Padding(
+                //     padding: const EdgeInsets.only(top: 15),
+                //     child: Marquee(
+                //       text: 'test',
+                //       style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
+                //       scrollAxis: Axis.horizontal,
+                //       crossAxisAlignment: CrossAxisAlignment.start,
+                //       blankSpace: 20.0,
+                //       velocity: 100.0,
+                //       pauseAfterRound: Duration(seconds: 1),
+                //       startPadding: 10.0,
+                //       accelerationDuration: Duration(seconds: 1),
+                //       accelerationCurve: Curves.linear,
+                //       decelerationDuration: Duration(milliseconds: 500),
+                //       decelerationCurve: Curves.easeOut,
+                //     ),
+                //   ),
+                // ):
                 SizedBox(height: 10),
+                // performanc
+                isCheckedIn ?
+                Container(
+                  height: 90,
+                  child: Card(
+                    elevation: 4,
+                    margin: EdgeInsets.all(8.0),
+                    child: Padding(
+                      padding: EdgeInsets.all(10.0),
+                      child: Column(
+                        children: [
+                          Column(
+                            children: [
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: <Widget>[
+                                  Text(getTranslated(context, 'STATUS')!), //
+                                  Text("${punchInModel?.data?.userStatus}"),
+                                ],
+                              ),
+                              SizedBox(height: 5),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(getTranslated(context, 'CHECKOUTTIME')!),
+                                  Text("${punchInModel?.data?.punchoutTime}")
+                                ],
+                              ),
+                              SizedBox(height: 9),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ):
                 customTabbar(),
                 SizedBox(height: 10),
                 // _deliverPincode(),
@@ -427,15 +533,12 @@ class _HomePageState extends State<HomePage>
                 // _firstHeader(),
               // const SizedBox(height: 10,),
               // _slider(),
-              Padding(
-                padding: EdgeInsets.all(12),
-                child: Text("Assigned Task", style: TextStyle(
-                    color: colors.primary,
-                    fontSize: 20,
-                    fontWeight: FontWeight.w600
-                ),
-                ),
-              ),
+              // Padding(
+              //   padding: EdgeInsets.all(12),
+              //   child: Text("Assigned Task",
+              //     style: TextStyle(color: colors.primary, fontSize: 20, fontWeight: FontWeight.w600),
+              //   ),
+              // ),
               _catList(),
                 const SizedBox(height: 25),
                 // Container(
@@ -486,8 +589,7 @@ class _HomePageState extends State<HomePage>
             ),
           ),
         ),
-      )
-          : noInternet(context),
+      ): noInternet(context),
     );
   }
 
@@ -498,231 +600,6 @@ class _HomePageState extends State<HomePage>
     return callApi();
   }
 
-  Widget _slider() {
-    double height = deviceWidth! / 2.2;
-    return Selector<HomeProvider, bool>(
-      builder: (context, data, child) {
-        return data
-            ? sliderLoading()
-            : ClipRRect(
-          borderRadius: BorderRadius.circular(15),
-          child: Column(
-            children: [
-              Container(
-                height: height,
-                width: double.infinity,
-                child: CarouselSlider(
-                  options: CarouselOptions(
-                    viewportFraction: 0.8,
-                    initialPage: 0,
-                    enableInfiniteScroll: true,
-                    reverse: false,
-                    autoPlay: true,
-                    autoPlayInterval: Duration(seconds: 3),
-                    autoPlayAnimationDuration:
-                    Duration(milliseconds: 1200),
-                    autoPlayCurve: Curves.fastOutSlowIn,
-                    enlargeCenterPage: true,
-                    scrollDirection: Axis.horizontal,
-                    height: height,
-                    onPageChanged: (position, reason) {
-                      setState(() {
-                        currentIndex = position;
-                      });
-                      print(reason);
-                      print(CarouselPageChangedReason.controller);
-                    },
-                  ),
-                  items: homeSliderList.map((val) {
-                    return InkWell(
-                      onTap: () {
-                        // if (homeSliderList[currentindex].type ==
-                        //     "restaurants") {
-                        //   print(homeSliderList[currentindex].list);
-                        //   if (homeSliderList[currentindex].list!=null) {
-                        //     var item =
-                        //         homeSliderList[currentindex].list;
-                        //     // Navigator.push(
-                        //     //     context,
-                        //     //     MaterialPageRoute(
-                        //     //         builder: (context) => SellerProfile(
-                        //     //           title: item.store_name.toString(),
-                        //     //           sellerID: item.seller_id.toString(),
-                        //     //           sellerId: item.seller_id.toString(),
-                        //     //           sellerData: item,
-                        //     //           userLocation: currentAddress.text,
-                        //     //           // catId: widget.catId,
-                        //     //           shop: false,
-                        //     //         )));
-                        //     /*Navigator.push(
-                        //             context,
-                        //             PageRouteBuilder(
-                        //                 pageBuilder: (_, __, ___) =>
-                        //                     ProductDetail(
-                        //                         model: item,
-                        //                         secPos: 0,
-                        //                         index: 0,
-                        //                         list: true)),
-                        //           );*/
-                        //   }
-                        // } else if (homeSliderList[currentindex].type ==
-                        //     "categories") {
-                        //   var item = homeSliderList[currentindex].list;
-                        //   Navigator.push(
-                        //       context,
-                        //       MaterialPageRoute(
-                        //           builder: (context) => SellerList(
-                        //             catId: item.categoryId,
-                        //             catName: item.name,
-                        //             userLocation:
-                        //             currentAddress.text,
-                        //             getByLocation: true,
-                        //           )));
-                        // }
-                      },
-                      child: Container(
-                        width: MediaQuery.of(context).size.width,
-                        child: ClipRRect(
-                            borderRadius: BorderRadius.circular(10),
-                            child: Image.network(
-                              "${val.image}",
-                              fit: BoxFit.fill,
-                            )),
-                      ),
-                    );
-                  }).toList(),
-                ),
-                // margin: EdgeInsetsDirectional.only(top: 10),
-                // child: PageView.builder(
-                //   itemCount: homeSliderList.length,
-                //   scrollDirection: Axis.horizontal,
-                //   controller: _controller,
-                //   pageSnapping: true,
-                //   physics: AlwaysScrollableScrollPhysics(),
-                //   onPageChanged: (index) {
-                //     context.read<HomeProvider>().setCurSlider(index);
-                //   },
-                //   itemBuilder: (BuildContext context, int index) {
-                //     return pages[index];
-                //   },
-                // ),
-              ),
-              Row(
-                  mainAxisSize: MainAxisSize.max,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: homeSliderList.map((e) {
-                    int index = homeSliderList.indexOf(e);
-                    return Container(
-                        width: 8.0,
-                        height: 8.0,
-                        margin: EdgeInsets.symmetric(
-                            vertical: 10.0, horizontal: 2.0),
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: currentIndex == index
-                              ? Theme.of(context).colorScheme.fontColor
-                              : Theme.of(context).colorScheme.lightBlack,
-                        ));
-                  }).toList()),
-            ],
-          ),
-        );
-      },
-      selector: (_, homeProvider) => homeProvider.sliderLoading,
-    );
-  }
-
-  Widget _firstHeader(){
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        InkWell(
-          onTap: (){
-            Navigator.push(context, MaterialPageRoute(builder: (context)=> MyWallet()));
-          },
-          child: Card(
-            elevation: 4,
-            shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(15)
-            ),
-            child: Container(
-              height: MediaQuery.of(context).size.width/2-40,
-              width: MediaQuery.of(context).size.width/2-40,
-              child: Center(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Consumer<UserProvider>(
-                        builder: (context, userProvider, _) {
-                          return Text(
-                            myEarnings == '' || myEarnings == null ?
-                            CUR_CURRENCY! +
-                                " " + "0"
-                                :   CUR_CURRENCY! +
-                                " " + myEarnings.toString(),
-                            style: TextStyle(
-                                fontSize: 36,
-                                fontWeight: FontWeight.w600,
-                                color: colors.secondary
-                            ),);
-                        }),
-                    Text("My Earning", style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.w600,
-                        color: Theme.of(context).colorScheme.fontColor
-                    ),),
-
-                  ],
-                ),
-              ),
-            ),
-          ),
-        ),
-        InkWell(
-          onTap: (){
-            // Navigator.push(context, MaterialPageRoute(builder: (context)=> MyLeadsAccounts()));
-          },
-          child: Card(
-            elevation: 4,
-            shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(15)
-            ),
-            child: Container(
-              height: MediaQuery.of(context).size.width/2-40,
-              width: MediaQuery.of(context).size.width/2-40,
-              child: Center(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Consumer<UserProvider>(
-                        builder: (context, userProvider, _) {
-                          return Text(
-                            leadsCount == '' || leadsCount == null ?
-                            '0'
-                                : leadsCount.toString(),
-                            style: TextStyle(
-                                fontSize: 36,
-                                fontWeight: FontWeight.w600,
-                                color: colors.secondary
-                            ),);
-                        }),
-                    Text("My Leads", style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.w600,
-                        color: Theme.of(context).colorScheme.fontColor
-                    ),),
-                  ],
-                ),
-              ),
-            ),
-          ),
-        )
-      ],
-    );
-  }
-
   void _animateSlider() {
     Future.delayed(Duration(seconds: 30)).then(
           (_) {
@@ -730,391 +607,14 @@ class _HomePageState extends State<HomePage>
           int nextPage = _controller.hasClients
               ? _controller.page!.round() + 1
               : _controller.initialPage;
-
-          if (nextPage == homeSliderList.length) {
-            nextPage = 0;
-          }
+          if (nextPage == homeSliderList.length) {nextPage = 0;}
           if (_controller.hasClients)
-            _controller
-                .animateToPage(nextPage,
+            _controller.animateToPage(nextPage,
                 duration: Duration(milliseconds: 200), curve: Curves.linear)
                 .then((_) => _animateSlider());
         }
       },
     );
-  }
-
-  _singleSection(int index) {
-    Color back;
-    int pos = index % 5;
-    if (pos == 0)
-      back = Theme.of(context).colorScheme.back1;
-    else if (pos == 1)
-      back = Theme.of(context).colorScheme.back2;
-    else if (pos == 2)
-      back = Theme.of(context).colorScheme.back3;
-    else if (pos == 3)
-      back = Theme.of(context).colorScheme.back4;
-    else
-      back = Theme.of(context).colorScheme.back5;
-
-    return sectionList[index].productList!.length > 0
-        ? Column(
-      mainAxisSize: MainAxisSize.min,
-      children: <Widget>[
-        Padding(
-          padding: const EdgeInsets.only(top: 8.0),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
-              _getHeading(sectionList[index].title ?? "", index),
-              _getSection(index),
-            ],
-          ),
-        ),
-        offerImages.length > index ? _getOfferImage(index) : Container(),
-      ],
-    )
-        : Container();
-  }
-
-  _getHeading(String title, int index) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.only(right: 20.0),
-          child: Stack(
-            clipBehavior: Clip.none,
-            alignment: Alignment.centerRight,
-            children: <Widget>[
-              Container(
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.only(
-                    topLeft: Radius.circular(20),
-                    topRight: Radius.circular(20),
-                  ),
-                  color: colors.yellow,
-                ),
-                padding: EdgeInsetsDirectional.only(
-                    start: 10, bottom: 3, top: 3, end: 10),
-                child: Text(
-                  title,
-                  style: Theme.of(context)
-                      .textTheme
-                      .subtitle2!
-                      .copyWith(color: colors.blackTemp),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-              /*   Positioned(
-                  // clipBehavior: Clip.hardEdge,
-                  // margin: EdgeInsets.symmetric(horizontal: 20),
-
-                  right: -14,
-                  child: SvgPicture.asset("assets/images/eshop.svg"))*/
-            ],
-          ),
-        ),
-        Padding(
-          padding: const EdgeInsets.symmetric(vertical: 5.0, horizontal: 10),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Expanded(
-                child: Text(sectionList[index].shortDesc ?? "",
-                    style: Theme.of(context).textTheme.subtitle1!.copyWith(
-                        color: Theme.of(context).colorScheme.fontColor)),
-              ),
-              TextButton(
-                style: TextButton.styleFrom(
-                    minimumSize: Size.zero, // <
-                    backgroundColor: (Theme.of(context).colorScheme.white),
-                    padding: EdgeInsets.symmetric(horizontal: 10, vertical: 5)),
-                child: Text(
-                  getTranslated(context, 'SHOP_NOW')!,
-                  style: Theme.of(context).textTheme.caption!.copyWith(
-                      color: Theme.of(context).colorScheme.fontColor,
-                      fontWeight: FontWeight.bold),
-                ),
-                onPressed: () {
-                  SectionModel model = sectionList[index];
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => SectionList(
-                        index: index,
-                        section_model: model,
-                      ),
-                    ),
-                  );
-                },
-              ),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-
-
-  _getOfferImage(index) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 10.0),
-      child: InkWell(
-        child: FadeInImage(
-            fit: BoxFit.contain,
-            fadeInDuration: Duration(milliseconds: 150),
-            image: CachedNetworkImageProvider(offerImages[index].image!),
-            width: double.maxFinite,
-            imageErrorBuilder: (context, error, stackTrace) => erroWidget(50),
-
-            // errorWidget: (context, url, e) => placeHolder(50),
-            placeholder: AssetImage(
-              "assets/images/sliderph.png",
-            )),
-        onTap: () {
-          if (offerImages[index].type == "products") {
-            Product? item = offerImages[index].list;
-
-            Navigator.push(
-              context,
-              PageRouteBuilder(
-                //transitionDuration: Duration(seconds: 1),
-                  pageBuilder: (_, __, ___) =>
-                      ProductDetail(model: item, secPos: 0, index: 0, list: true
-                        //  title: sectionList[secPos].title,
-                      )),
-            );
-          } else if (offerImages[index].type == "categories") {
-            Product item = offerImages[index].list;
-            if (item.subList == null || item.subList!.length == 0) {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => ProductList(
-                    name: item.name,
-                    id: item.id,
-                    tag: false,
-                    fromSeller: false,
-                  ),
-                ),
-              );
-            } else {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => SubCategory(
-                    title: item.name!,
-                    subList: item.subList,
-                  ),
-                ),
-              );
-            }
-          }
-        },
-      ),
-    );
-  }
-
-  _getSection(int i) {
-    var orient = MediaQuery.of(context).orientation;
-
-    return sectionList[i].style == DEFAULT
-        ? Padding(
-      padding: const EdgeInsets.all(15.0),
-      child: GridView.count(
-        // mainAxisSpacing: 12,
-        // crossAxisSpacing: 12,
-        padding: EdgeInsetsDirectional.only(top: 5),
-        crossAxisCount: 2,
-        shrinkWrap: true,
-        childAspectRatio: 0.750,
-
-        //  childAspectRatio: 1.0,
-        physics: NeverScrollableScrollPhysics(),
-        children:
-        //  [
-        //   Container(height: 500, width: 1200, color: Colors.red),
-        //   Text("hello"),
-        //   Container(height: 10, width: 50, color: Colors.green),
-        // ]
-        List.generate(
-          sectionList[i].productList!.length < 4
-              ? sectionList[i].productList!.length
-              : 4,
-              (index) {
-            // return Container(
-            //   width: 600,
-            //   height: 50,
-            //   color: Colors.red,
-            // );
-
-            return productItem(i, index, index % 2 == 0 ? true : false);
-          },
-        ),
-      ),
-    )
-        : sectionList[i].style == STYLE1
-        ? sectionList[i].productList!.length > 0
-        ? Padding(
-        padding: const EdgeInsets.all(15.0),
-        child: Row(
-          children: [
-            Flexible(
-                flex: 3,
-                fit: FlexFit.loose,
-                child: Container(
-                    height: orient == Orientation.portrait
-                        ? deviceHeight! * 0.4
-                        : deviceHeight!,
-                    child: productItem(i, 0, true))),
-            Flexible(
-              flex: 2,
-              fit: FlexFit.loose,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Container(
-                      height: orient == Orientation.portrait
-                          ? deviceHeight! * 0.2
-                          : deviceHeight! * 0.5,
-                      child: productItem(i, 1, false)),
-                  Container(
-                      height: orient == Orientation.portrait
-                          ? deviceHeight! * 0.2
-                          : deviceHeight! * 0.5,
-                      child: productItem(i, 2, false)),
-                ],
-              ),
-            ),
-          ],
-        ))
-        : Container()
-        : sectionList[i].style == STYLE2
-        ? Padding(
-        padding: const EdgeInsets.all(15.0),
-        child: Row(
-          children: [
-            Flexible(
-              flex: 2,
-              fit: FlexFit.loose,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Container(
-                      height: orient == Orientation.portrait
-                          ? deviceHeight! * 0.2
-                          : deviceHeight! * 0.5,
-                      child: productItem(i, 0, true)),
-                  Container(
-                      height: orient == Orientation.portrait
-                          ? deviceHeight! * 0.2
-                          : deviceHeight! * 0.5,
-                      child: productItem(i, 1, true)),
-                ],
-              ),
-            ),
-            Flexible(
-                flex: 3,
-                fit: FlexFit.loose,
-                child: Container(
-                    height: orient == Orientation.portrait
-                        ? deviceHeight! * 0.4
-                        : deviceHeight,
-                    child: productItem(i, 2, false))),
-          ],
-        ))
-        : sectionList[i].style == STYLE3
-        ? Padding(
-        padding: const EdgeInsets.all(15.0),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Flexible(
-                flex: 1,
-                fit: FlexFit.loose,
-                child: Container(
-                    height: orient == Orientation.portrait
-                        ? deviceHeight! * 0.3
-                        : deviceHeight! * 0.6,
-                    child: productItem(i, 0, false))),
-            Container(
-              height: orient == Orientation.portrait
-                  ? deviceHeight! * 0.2
-                  : deviceHeight! * 0.5,
-              child: Row(
-                children: [
-                  Flexible(
-                      flex: 1,
-                      fit: FlexFit.loose,
-                      child: productItem(i, 1, true)),
-                  Flexible(
-                      flex: 1,
-                      fit: FlexFit.loose,
-                      child: productItem(i, 2, true)),
-                  Flexible(
-                      flex: 1,
-                      fit: FlexFit.loose,
-                      child: productItem(i, 3, false)),
-                ],
-              ),
-            ),
-          ],
-        ))
-        : sectionList[i].style == STYLE4
-        ? Padding(
-        padding: const EdgeInsets.all(15.0),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Flexible(
-                flex: 1,
-                fit: FlexFit.loose,
-                child: Container(
-                    height: orient == Orientation.portrait
-                        ? deviceHeight! * 0.25
-                        : deviceHeight! * 0.5,
-                    child: productItem(i, 0, false))),
-            Container(
-              height: orient == Orientation.portrait
-                  ? deviceHeight! * 0.2
-                  : deviceHeight! * 0.5,
-              child: Row(
-                children: [
-                  Flexible(
-                      flex: 1,
-                      fit: FlexFit.loose,
-                      child: productItem(i, 1, true)),
-                  Flexible(
-                      flex: 1,
-                      fit: FlexFit.loose,
-                      child: productItem(i, 2, false)),
-                ],
-              ),
-            ),
-          ],
-        ))
-        : Padding(
-        padding: const EdgeInsets.all(15.0),
-        child: GridView.count(
-            padding: EdgeInsetsDirectional.only(top: 5),
-            crossAxisCount: 2,
-            shrinkWrap: true,
-            childAspectRatio: 1.2,
-            physics: NeverScrollableScrollPhysics(),
-            mainAxisSpacing: 0,
-            crossAxisSpacing: 0,
-            children: List.generate(
-              sectionList[i].productList!.length < 6
-                  ? sectionList[i].productList!.length
-                  : 6,
-                  (index) {
-                return productItem(i, index,
-                    index % 2 == 0 ? true : false);
-              },
-            )));
   }
 
   Widget productItem(int secPos, int index, bool pad) {
@@ -1289,32 +789,6 @@ class _HomePageState extends State<HomePage>
       return Container();
   }
 
-  _section() {
-    return Selector<HomeProvider, bool>(
-      builder: (context, data, child) {
-        return data
-            ? Container(
-          width: double.infinity,
-          child: Shimmer.fromColors(
-            baseColor: Theme.of(context).colorScheme.simmerBase,
-            highlightColor: Theme.of(context).colorScheme.simmerHigh,
-            child: sectionLoading(),
-          ),
-        )
-            : ListView.builder(
-          padding: EdgeInsets.all(0),
-          itemCount: sectionList.length,
-          shrinkWrap: true,
-          physics: NeverScrollableScrollPhysics(),
-          itemBuilder: (context, index) {
-            print("here");
-            return _singleSection(index);
-          },
-        );
-      },
-      selector: (_, homeProvider) => homeProvider.secLoading,
-    );
-  }
   subCatItem(List<Product> subList, int index, BuildContext context) {
     return GestureDetector(
       child: Column(
@@ -1340,16 +814,13 @@ class _HomePageState extends State<HomePage>
                   // ),
                 ),
               )),
-          Text(
+            Text(
             subList[index].name! + "\n",
             textAlign: TextAlign.center,
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
-            style: Theme.of(context)
-                .textTheme
-                .caption!
-                .copyWith(color: Theme.of(context).colorScheme.fontColor),
-          )
+            style: Theme.of(context).textTheme.caption!.copyWith(color: Theme.of(context).colorScheme.fontColor),
+          ),
         ],
       ),
       onTap: () {
@@ -1358,8 +829,7 @@ class _HomePageState extends State<HomePage>
           if (popularList[index].subList == null ||
               popularList[index].subList!.length == 0) {
             Navigator.push(
-                context,
-                MaterialPageRoute(
+                context, MaterialPageRoute(
                   builder: (context) => ProductList(
                     name: popularList[index].name,
                     id: popularList[index].id,
@@ -1368,7 +838,6 @@ class _HomePageState extends State<HomePage>
                   ),
                 ));
           } else {
-
             Navigator.push(
                 context,
                 MaterialPageRoute(
@@ -1400,8 +869,7 @@ class _HomePageState extends State<HomePage>
                 builder: (context) => SubCategory(
                   subList: subList[index].subList,
                   title: subList[index].name ?? "",
-                ),
-              ));
+                )));
         }
       },
     );
@@ -1431,7 +899,8 @@ class _HomePageState extends State<HomePage>
                   onTap: () {
                     Navigator.push(context, MaterialPageRoute(builder: (context) => TaskDetails(model: taskdata[index])));
                   },
-                  child: Container(
+                  child:
+                  Container(
                     height: 200,
                     child: Card(
                       elevation: 4,
@@ -1447,7 +916,7 @@ class _HomePageState extends State<HomePage>
                               Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: <Widget>[
-                              Text('Assign Date:'), //
+                              Text(getTranslated(context, 'ASSIGNDATE')!), //
                                Text("${taskdata[index].dateCreated}"),
                               ],
                                ),
@@ -1455,7 +924,7 @@ class _HomePageState extends State<HomePage>
                               Row(
                                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                 children: [
-                                  Text("Due Date:"),
+                                  Text(getTranslated(context, 'DUEDATE')!),
                                   Text("${taskdata[index].dueDate}")
                                 ],
                               ),
@@ -1463,16 +932,16 @@ class _HomePageState extends State<HomePage>
                               Row(
                                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                 children: [
-                                  Text("Description:"),
-                                  Container(child: Text("${taskdata[index].description}", overflow: TextOverflow.ellipsis,))
+                                  Text(getTranslated(context, 'DESCRIPTION')!),
+                                  Container(child: Text("${taskdata[index].description}", overflow: TextOverflow.ellipsis))
                                 ],
                               ),
                               SizedBox(height: 9),
                               Row(
                                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                 children: [
-                                  Text("Assigned Team"),
-                                  Text("Created Team"),
+                                  Text(getTranslated(context, 'ASSIGNEDTEAM')!),
+                                  Text(getTranslated(context, 'CREADTEDTEAM')!),
                                 ],
                               ),
                               SizedBox(height: 9),
@@ -1613,8 +1082,7 @@ class _HomePageState extends State<HomePage>
         //         );
         //   },
         // ),
-        }),
-            ),
+        })),
         );
       },
       selector: (_, homeProvider) => homeProvider.catLoading,
@@ -1622,7 +1090,7 @@ class _HomePageState extends State<HomePage>
   }
 
   int _currentIndex = 1;
-  customTabbar(){
+  customTabbar() {
     return Padding(
       padding: const EdgeInsets.only(left:5.0,right:5),
       child: Container(
@@ -1637,6 +1105,7 @@ class _HomePageState extends State<HomePage>
               onTap: (){
                 setState(() {
                   _currentIndex = 1;
+                  getTaskList("1");
                   // bankData();
                 });
               },
@@ -1650,8 +1119,16 @@ class _HomePageState extends State<HomePage>
                 height: 40,
                 width: 110,
                 child: Center(
-                  child: Text
-                    ("Complete Task ${taskCountModel?.data?.completeTasks}",style: TextStyle(color: _currentIndex == 1 ? colors.whiteTemp:colors.blackTemp,fontSize: 13)),
+                  child: Row(
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.only(left: 3),
+                        child: Text(getTranslated(context, 'COMPLETETASK')!,style: TextStyle(color: _currentIndex == 1 ? colors.whiteTemp:colors.blackTemp,fontSize: 12)),
+                      ),
+                      SizedBox(width: 4,),
+                      Text("${taskCountModel?.data?.completeTasks}",style: TextStyle(color: _currentIndex == 1 ? colors.whiteTemp:colors.blackTemp,fontSize: 12)),
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -1660,6 +1137,7 @@ class _HomePageState extends State<HomePage>
               onTap: () {
                 setState(() {
                   _currentIndex = 2;
+                  getTaskList("0");
                   // showAlertDialog(
                   //   context,
                   //   'Pin Code',
@@ -1677,7 +1155,16 @@ class _HomePageState extends State<HomePage>
                 height: 40,
                 width: 130,
                 child: Center(
-                  child: Text("NonComplete Task ${taskCountModel?.data?.pendingTask}",style: TextStyle(color: _currentIndex == 2 ?colors.whiteTemp:colors.blackTemp, fontSize: 13)),
+                  child: Row(
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.only(left: 7),
+                        child: Text(getTranslated(context, 'PENDINGTASK')!,style: TextStyle(color: _currentIndex == 2 ? colors.whiteTemp:colors.blackTemp,fontSize: 13)),
+                      ),
+                      SizedBox(width: 10),
+                      Text("${taskCountModel?.data?.pendingTask}",style: TextStyle(color: _currentIndex == 2 ? colors.whiteTemp:colors.blackTemp,fontSize: 13)),
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -1686,6 +1173,7 @@ class _HomePageState extends State<HomePage>
               onTap: () {
                 setState(() {
                   _currentIndex = 3;
+                  getTaskList("");
                   // Navigator.push(context, MaterialPageRoute(builder: (context)=>ReportScreen()));
                 });
               },
@@ -1694,42 +1182,27 @@ class _HomePageState extends State<HomePage>
                 child: Container(
                   decoration: BoxDecoration(
                       color: _currentIndex == 3 ?
-                      colors.primary
-                          : colors.primary.withOpacity(0.2),
+                      colors.primary : colors.primary.withOpacity(0.2),
                       borderRadius: BorderRadius.circular(5)
                   ),
                   // width: 120,
                   height: 40,
                   width: 83,
                   child: Center(
-                    child: Text("Total Task ${taskCountModel?.data?.allTasks}",style: TextStyle(color: _currentIndex == 3
-                        ? colors.whiteTemp:colors.blackTemp, fontSize: 13)),
+                    child: Row(
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.only(left: 5),
+                          child: Text(getTranslated(context, 'TOTALTASK')!,style: TextStyle(color: _currentIndex == 3 ? colors.whiteTemp:colors.blackTemp,fontSize: 12)),
+                        ),
+                        SizedBox(width: 6),
+                        Text("${taskCountModel?.data?.allTasks}", style: TextStyle(color: _currentIndex == 3 ? colors.whiteTemp:colors.blackTemp,fontSize: 12)),
+                      ],
+                    ),
                   ),
                 ),
               ),
             ),
-            // SizedBox(width:10,),
-            // InkWell(
-            //   onTap: (){
-            //     setState(() {
-            //       _currentIndex = 4;
-            //     });
-            //   },
-            //   child: Container(
-            //     decoration: BoxDecoration(
-            //         color: _currentIndex == 4 ?
-            //         colors.primary
-            //             : colors.primary.withOpacity(0.2),
-            //         borderRadius: BorderRadius.circular(5)
-            //     ),
-            //     // width: 120,
-            //     height: 40,
-            //     width:75,
-            //     child: Center(
-            //       child: Text("Total Task",style: TextStyle(color: _currentIndex == 4 ?colors.whiteTemp:colors.blackTemp)),
-            //     ),
-            //   ),
-            // )
           ],
         ),
       ),
@@ -1761,24 +1234,22 @@ class _HomePageState extends State<HomePage>
 
   Future<Null> callApi() async {
     UserProvider user = Provider.of<UserProvider>(context, listen: false);
-    SettingProvider setting =
-    Provider.of<SettingProvider>(context, listen: false);
-
+    SettingProvider setting = Provider.of<SettingProvider>(context, listen: false);
     user.setUserId(setting.userId);
-
     _isNetworkAvail = await isNetworkAvailable();
     if (_isNetworkAvail) {
       convertDateTimeDispla();
+      showText();
       taskCount();
-      getTaskList();
-      getSetting();
-      getSlider();
-      getCat();
+      getTaskList('');
+      // getSetting();
+      // getSlider();
+      // getCat();
       getUserCheckInStatus();
       // getSeller();
-      getSection();
-      getOfferImages();
-      setCatid();
+      // getSection();
+      // getOfferImages();
+      // setCatid();
     } else {
       if (mounted)
         setState(() {
@@ -1977,20 +1448,13 @@ class _HomePageState extends State<HomePage>
     if (_isNetworkAvail) {
       try {
         var parameter = {USER_ID: CUR_USERID, SAVE_LATER: save};
-
-        Response response =
-        await post(getCartApi, body: parameter, headers: headers)
-            .timeout(Duration(seconds: timeOut));
-
+        Response response = await post(getCartApi, body: parameter, headers: headers).timeout(Duration(seconds: timeOut));
         var getdata = json.decode(response.body);
         bool error = getdata["error"];
         String? msg = getdata["message"];
         if (!error) {
           var data = getdata["data"];
-
-          List<SectionModel> cartList = (data as List)
-              .map((data) => new SectionModel.fromCart(data))
-              .toList();
+          List<SectionModel> cartList = (data as List).map((data) => new SectionModel.fromCart(data)).toList();
           context.read<CartProvider>().setCartlist(cartList);
         }
       } on TimeoutException catch (_) {}

@@ -26,17 +26,19 @@ import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:in_app_review/in_app_review.dart';
-import 'package:omega_employee_management/Screen/work_allotment/work_allotment_screen.dart';
+import 'package:omega_employee_management/Screen/ViewProfile.dart';
 import 'package:provider/provider.dart';
 import 'package:share/share.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../Helper/Constant.dart';
 import '../Provider/Theme.dart';
 import '../main.dart';
+import 'Chat.dart';
 import 'Faqs.dart';
 import 'Manage_Address.dart';
 import 'MyOrder.dart';
 import 'My_Wallet.dart';
+import 'Performance/Performace.dart';
 import 'Privacy_Policy.dart';
 
 class MyProfile extends StatefulWidget {
@@ -219,147 +221,156 @@ class StateProfile extends State<MyProfile> with TickerProviderStateMixin {
 
   _getHeader() {
     return Padding(
-        padding: const EdgeInsetsDirectional.only(bottom: 10.0, top: 10),
+        padding: const EdgeInsetsDirectional.only(bottom: 10.0, top: 7,),
         child: Container(
           padding: EdgeInsetsDirectional.only(
             start: 10.0,
           ),
-          child: Row(
-            children: [
-              Selector<UserProvider, String>(
-                  selector: (_, provider) => provider.profilePic,
-                  builder: (context, profileImage, child) {
-                    return getUserImage(
-                        profileImage, openChangeUserDetailsBottomSheet);
-                  }),
-              /*         Container(
-                margin: EdgeInsetsDirectional.only(end: 20),
-                height: 80,
-                width: 80,
-                decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    border: Border.all(width: 1.0, color: Theme.of(context).colorScheme.white)),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(100.0),
-                  child: Consumer<UserProvider>(
-                      builder: (context, userProvider, _) {
-                        return userProvider.profilePic != ''
-                            ? new FadeInImage(
-                          fadeInDuration: Duration(milliseconds: 150),
-                          image: NetworkImage(userProvider.profilePic),
-                          height: 64.0,
-                          width: 64.0,
-                          fit: BoxFit.cover,
-                          imageErrorBuilder: (context, error, stackTrace) =>
-                              erroWidget(64),
-                          placeholder: placeHolder(64),
-                        )
-                            : imagePlaceHolder(62);
-                      }),
-                ),
-              ),*/
-              Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Selector<UserProvider, String>(
-                      selector: (_, provider) => provider.curUserName,
-                      builder: (context, userName, child) {
-                        nameController = TextEditingController(text: userName);
-                        return Text(
-                          userName == ""
-                              ? getTranslated(context, 'GUEST')!
-                              : userName,
-                          style: Theme.of(context)
-                              .textTheme
-                              .subtitle1!
-                              .copyWith(
-                                color: Theme.of(context).colorScheme.fontColor,
-                              ),
-                        );
-                      }),
-                  Selector<UserProvider, String>(
-                      selector: (_, provider) => provider.mob,
-                      builder: (context, userMobile, child) {
-                        return userMobile != ""
-                            ? Text(
-                                userMobile,
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .subtitle2!
-                                    .copyWith(
-                                        color: Theme.of(context)
-                                            .colorScheme
-                                            .fontColor,
-                                        fontWeight: FontWeight.normal),
-                              )
-                            : Container(
-                                height: 0,
-                              );
-                      }),
-                  Selector<UserProvider, String>(
-                      selector: (_, provider) => provider.email,
-                      builder: (context, userEmail, child) {
-                        emailController =
-                            TextEditingController(text: userEmail);
-                        return userEmail != ""
-                            ? Text(
-                                userEmail,
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .subtitle2!
-                                    .copyWith(
-                                        color: Theme.of(context)
-                                            .colorScheme
-                                            .fontColor,
-                                        fontWeight: FontWeight.normal),
-                              )
-                            : Container(
-                                height: 0,
-                              );
-                      }),
-
-                  /* Consumer<UserProvider>(builder: (context, userProvider, _) {
-                    print("mobb**${userProvider.profilePic}");
-                    return (userProvider.mob != "")
-                        ? Text(
-                            userProvider.mob,
-                            style: Theme.of(context)
-                                .textTheme
-                                .subtitle2!
-                                .copyWith(color: Theme.of(context).colorScheme.fontColor),
+          child: Padding(
+            padding: const EdgeInsets.only(left: 0, top: 10),
+            child: Row(
+              children: [
+                // Selector<UserProvider, String>(
+                //     selector: (_, provider) => provider.profilePic,
+                //     builder: (context, profileImage, child) {
+                //       return getUserImage(
+                //           profileImage, openChangeUserDetailsBottomSheet);
+                //     }),
+                /*         Container(
+                  margin: EdgeInsetsDirectional.only(end: 20),
+                  height: 80,
+                  width: 80,
+                  decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      border: Border.all(width: 1.0, color: Theme.of(context).colorScheme.white)),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(100.0),
+                    child: Consumer<UserProvider>(
+                        builder: (context, userProvider, _) {
+                          return userProvider.profilePic != ''
+                              ? new FadeInImage(
+                            fadeInDuration: Duration(milliseconds: 150),
+                            image: NetworkImage(userProvider.profilePic),
+                            height: 64.0,
+                            width: 64.0,
+                            fit: BoxFit.cover,
+                            imageErrorBuilder: (context, error, stackTrace) =>
+                                erroWidget(64),
+                            placeholder: placeHolder(64),
                           )
-                        : Container(
-                            height: 0,
+                              : imagePlaceHolder(62);
+                        }),
+                  ),
+                ),*/
+                Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Selector<UserProvider, String>(
+                        selector: (_, provider) => provider.curUserName,
+                        builder: (context, userName, child) {
+                          nameController = TextEditingController(text: userName);
+                          return InkWell(
+                            onTap: () {
+                              // Navigator.push(context, MaterialPageRoute(builder: (context) => ViewProfile()));
+                            },
+                            child: Text(
+                              userName == ""
+                                  ? getTranslated(context, 'GUEST')!
+                                  : userName,
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .subtitle1!
+                                  .copyWith(
+                                    color: Theme.of(context).colorScheme.fontColor,
+                                fontSize: 19,
+                                  ),
+                            ),
                           );
-                  }),*/
-                  Consumer<UserProvider>(builder: (context, userProvider, _) {
-                    return userProvider.curUserName == ""
-                        ? Padding(
-                            padding: const EdgeInsetsDirectional.only(top: 7),
-                            child: InkWell(
-                              child: Text(
-                                  getTranslated(context, 'LOGIN_REGISTER_LBL')!,
+                        }),
+                    Selector<UserProvider, String>(
+                        selector: (_, provider) => provider.mob,
+                        builder: (context, userMobile, child) {
+                          return userMobile != ""
+                              ? Text(
+                                  userMobile,
                                   style: Theme.of(context)
                                       .textTheme
-                                      .caption!
+                                      .subtitle2!
                                       .copyWith(
-                                        color: colors.primary,
-                                        decoration: TextDecoration.underline,
-                                      )),
-                              onTap: () {
-                                Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) => LoginPage(),
-                                    ));
-                              },
-                            ))
-                        : Container();
-                  }),
-                ],
-              ),
-            ],
+                                          color: Theme.of(context)
+                                              .colorScheme
+                                              .fontColor,
+                                          fontWeight: FontWeight.normal, fontSize: 17),
+                                )
+                              : Container(
+                                  height: 0,
+                                );
+                        }),
+                    Selector<UserProvider, String>(
+                        selector: (_, provider) => provider.email,
+                        builder: (context, userEmail, child) {
+                          emailController =
+                              TextEditingController(text: userEmail);
+                          return userEmail != ""
+                              ? Text(
+                                  userEmail,
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .subtitle2!
+                                      .copyWith(
+                                          color: Theme.of(context)
+                                              .colorScheme
+                                              .fontColor,
+                                          fontWeight: FontWeight.normal, fontSize: 17),
+                                )
+                              : Container(
+                                  height: 0,
+                                );
+                        }),
+
+                    /* Consumer<UserProvider>(builder: (context, userProvider, _) {
+                      print("mobb**${userProvider.profilePic}");
+                      return (userProvider.mob != "")
+                          ? Text(
+                              userProvider.mob,
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .subtitle2!
+                                  .copyWith(color: Theme.of(context).colorScheme.fontColor),
+                            )
+                          : Container(
+                              height: 0,
+                            );
+                    }),*/
+                    Consumer<UserProvider>(builder: (context, userProvider, _) {
+                      return userProvider.curUserName == ""
+                          ? Padding(
+                              padding: const EdgeInsetsDirectional.only(top: 7),
+                              child: InkWell(
+                                child: Text(
+                                    getTranslated(context, 'LOGIN_REGISTER_LBL')!,
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .caption!
+                                        .copyWith(
+                                          color: colors.primary,
+                                          decoration: TextDecoration.underline,
+                                        )),
+                                onTap: () {
+                                  Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => LoginPage(),
+                                      ));
+                                },
+                              ))
+                          : Container();
+                    }),
+                  ],
+                ),
+              ],
+            ),
           ),
         ));
   }
@@ -451,8 +462,7 @@ class StateProfile extends State<MyProfile> with TickerProviderStateMixin {
     MyApp.setLocale(ctx, _locale);
   }
 
-  Future<void> setUpdateUser(String userID,
-      [oldPwd, newPwd, username, userEmail]) async {
+  Future<void> setUpdateUser(String userID, [oldPwd, newPwd, username, userEmail]) async {
     var apiBaseHelper = ApiBaseHelper();
     var data = {USER_ID: userID};
     if ((oldPwd != "") && (newPwd != "")) {
@@ -463,25 +473,22 @@ class StateProfile extends State<MyProfile> with TickerProviderStateMixin {
       data[EMAIL] = userEmail;
     }
 
-    final result = await apiBaseHelper.postAPICall(getUpdateUserApi, data);
-
+    final result = await apiBaseHelper.postAPICall(changePassword, data);
+    print("change password parameter ${data}");
     bool error = result["error"];
     String? msg = result["message"];
 
     Navigator.of(context).pop();
     if (!error) {
-      var settingProvider =
-          Provider.of<SettingProvider>(context, listen: false);
+      var settingProvider = Provider.of<SettingProvider>(context, listen: false);
       var userProvider = Provider.of<UserProvider>(context, listen: false);
-
       if ((username != "") && (userEmail != "")) {
         settingProvider.setPrefrence(USERNAME, username);
         userProvider.setName(username);
         settingProvider.setPrefrence(EMAIL, userEmail);
         userProvider.setEmail(userEmail);
       }
-
-      setSnackbar(getTranslated(context, 'USER_UPDATE_MSG')!);
+      setSnackbar(getTranslated(context, 'PASS_SUCCESS')!);
     } else {
       setSnackbar(msg!);
     }
@@ -537,8 +544,8 @@ class StateProfile extends State<MyProfile> with TickerProviderStateMixin {
         //CUR_USERID == "" || CUR_USERID == null ? Container() : _getDivider(),
         CUR_USERID == "" || CUR_USERID == null
             ? Container()
-            : _getDrawerItem(getTranslated(context, 'MY_ACCOUNTS')!,
-                'assets/images/pro_wh.svg'),
+            : _getDrawerItem(getTranslated(context, 'Chat')!,
+            'assets/images/pro_wh.svg'),
         CUR_USERID == "" || CUR_USERID == null
             ? Container()
             : _getDrawerItem(getTranslated(context, 'PERFORMANCE')!,
@@ -563,10 +570,10 @@ class StateProfile extends State<MyProfile> with TickerProviderStateMixin {
         _getDrawerItem(getTranslated(context, 'CHANGE_LANGUAGE_LBL')!,
             'assets/images/pro_language.svg'),
          // CUR_USERID == "" || CUR_USERID == null ? Container() : _getDivider(),
-        // CUR_USERID == "" || CUR_USERID == null
-        //     ? Container()
-        //     : _getDrawerItem(getTranslated(context, 'CHANGE_PASS_LBL')!,
-        //         'assets/images/pro_pass.svg'),
+        CUR_USERID == "" || CUR_USERID == null
+            ? Container()
+            : _getDrawerItem(getTranslated(context, 'CHANGE_PASS_LBL')!,
+                'assets/images/pro_pass.svg'),
         // _getDivider(),
         // CUR_USERID == "" || CUR_USERID == null || !refer
         //     ? Container()
@@ -597,10 +604,10 @@ class StateProfile extends State<MyProfile> with TickerProviderStateMixin {
         // _getDrawerItem(getTranslated(context, 'SHARE_APP')!,
         //     'assets/images/pro_share.svg'),
         // CUR_USERID == "" || CUR_USERID == null ? Container() : _getDivider(),
-        CUR_USERID == "" || CUR_USERID == null
-            ? Container()
-            : _getDrawerItem(getTranslated(context, 'LOGOUT')!,
-                'assets/images/pro_logout.svg'),
+        // CUR_USERID == "" || CUR_USERID == null
+        //     ? Container()
+        //     : _getDrawerItem(getTranslated(context, 'LOGOUT')!,
+        //         'assets/images/pro_logout.svg'),
       ],
     );
   }
@@ -621,9 +628,7 @@ class StateProfile extends State<MyProfile> with TickerProviderStateMixin {
           color: colors.primary,
         ),
         leading: SvgPicture.asset(
-          img,
-          height: 25,
-          width: 25,
+          img, height: 25, width: 25,
           color: colors.primary,
         ),
         dense: true,
@@ -633,14 +638,13 @@ class StateProfile extends State<MyProfile> with TickerProviderStateMixin {
               color: Theme.of(context).colorScheme.lightBlack, fontSize: 15),
         ),
         onTap: () {
-          if (title == getTranslated(context, 'MY_ORDERS_LBL')) {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => MyOrder(),
-              ),
-            );
-
+          if (title == getTranslated(context, 'MY_PROFILE_LBL')) {
+            // Navigator.push(
+            //   context,
+            //   MaterialPageRoute(
+            //     builder: (context) => ViewProfile(),
+            //   ),
+            // );
             //sendAndRetrieveMessage();
           } else if (title == getTranslated(context, 'MYTRANSACTION')) {
             Navigator.push(
@@ -655,19 +659,19 @@ class StateProfile extends State<MyProfile> with TickerProviderStateMixin {
             //       builder: (context) => MyLeadsAccounts(),
             //     ));
           }
-          else if (title == getTranslated(context, 'MY_ACCOUNTS')) {
+          else if (title == getTranslated(context, 'Chat')) {
             Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => MyWallet(),
-                ));
-
+                  builder: (context) => Chat(),
+                ),
+            );
           }
           else if (title == getTranslated(context, 'PERFORMANCE')) {
             Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => WorkallotmentScreen(),
+                  builder: (context) => PerformaceTracking(),
                 ),
             );
           }
@@ -972,7 +976,6 @@ class StateProfile extends State<MyProfile> with TickerProviderStateMixin {
       getTranslated(context, 'LIGHT_THEME'),
       getTranslated(context, 'DARK_THEME')
     ];
-
     themeNotifier = Provider.of<ThemeNotifier>(context);
 
     return Scaffold(
@@ -982,7 +985,33 @@ class StateProfile extends State<MyProfile> with TickerProviderStateMixin {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              _getHeader(),
+              SizedBox(height: 10,),
+              Card(
+                elevation: 2,
+                child: Container(
+                  decoration: BoxDecoration(borderRadius: BorderRadius.circular(10), color: Colors.white),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      _getHeader(),
+                      InkWell(
+                        onTap: () {
+                          Navigator.push(context, MaterialPageRoute(builder: (context) => ViewProfile()));
+                        },
+                        child: Padding(
+                          padding: const EdgeInsets.only(top: 10, right: 5),
+                          child: Container(
+                            height: 40,
+                            width: 100,
+                            decoration: BoxDecoration(borderRadius: BorderRadius.circular(10), color: colors.primary),
+                              child: Center(child: Text(getTranslated(context, 'VIEWPROFILE')!, style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold))),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
               _getDrawer(),
             ],
           ),
@@ -1513,8 +1542,7 @@ class StateProfile extends State<MyProfile> with TickerProviderStateMixin {
         passwordController.clear();
         confirmpassController.clear();
       } else if (key == _changeUserDetailsKey) {
-        setUpdateUser(
-            CUR_USERID!, "", "", nameController.text, emailController.text);
+        setUpdateUser(CUR_USERID!, "", "", nameController.text, emailController.text);
       }
       return true;
     }
@@ -1552,9 +1580,9 @@ class StateProfile extends State<MyProfile> with TickerProviderStateMixin {
                       bottomSheetHandle(),
                       bottomsheetLabel("CHANGE_PASS_LBL"),
                       setCurrentPasswordField(),
-                      setForgotPwdLable(),
+                      // setForgotPwdLable(),
                       newPwdField(),
-                      confirmPwdField(),
+                      // confirmPwdField(),
                       saveButton(getTranslated(context, "SAVE_LBL")!, () {
                         validateAndSave(_changePwdKey);
                       }),

@@ -596,7 +596,6 @@ String getToken() {
 
   String token = issueJwtHS256(claimSet, jwtKey);
   print("token : $token ");
-
   return token;
 }
 

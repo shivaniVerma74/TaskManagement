@@ -18,6 +18,11 @@ class Model {
       msg,
       uid,
       prodId,
+      userFrom,
+      userTo,
+      message,
+      createdAt,
+      sender,
       varId;
   bool? isDel;
   var list;
@@ -40,6 +45,11 @@ class Model {
       this.msg,
       this.attach,
       this.uid,
+        this.userFrom,
+        this.message,
+        this.createdAt,
+        this.sender,
+        this.userTo,
       this.date,
       this.prodId,
       this.isDel,
@@ -58,11 +68,17 @@ class Model {
     }
 
     return new Model(
+      userTo: parsedJson['user_to'],
+      createdAt: parsedJson['created_at'],
+      message: parsedJson['message'],
+      sender:  parsedJson['sender'],
+        userFrom: parsedJson['user_from'],
         id: parsedJson[ID],
         image: parsedJson[IMAGE],
         type: parsedJson[TYPE],
         typeId: parsedJson[TYPE_ID],
         list: listContent);
+
   }
 
   factory Model.fromTimeSlot(Map<String, dynamic> parsedJson) {
@@ -109,6 +125,11 @@ class Model {
 
     date = DateFormat('dd-MM-yyyy hh:mm a').format(DateTime.parse(date));
     return new Model(
+      userTo: parsedJson['user_to'],
+      createdAt: parsedJson['created_at'],
+       message: parsedJson['message'],
+      sender: parsedJson['sender'],
+        userFrom: parsedJson['user_from'],
         id: parsedJson[ID],
         title: parsedJson[TITLE],
         msg: parsedJson[MESSAGE],
@@ -116,6 +137,16 @@ class Model {
         name: parsedJson[NAME],
         date: date,
         attach: attachList);
+  }
+
+  Model.fromJson(Map<String, dynamic> json) {
+    id = json['id'];
+    userFrom = json['user_from'];
+    userTo = json['user_to'];
+    message = json['message'];
+   // read = json['read'];
+    createdAt = json['created_at'];
+    sender = json['sender'];
   }
 
   factory Model.setAllCat(String id, String name) {

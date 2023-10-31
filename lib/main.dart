@@ -28,17 +28,16 @@ import 'Provider/SettingProvider.dart';
 import 'Provider/order_provider.dart';
 import 'Screen/Dashboard.dart';
 
-
-const AndroidNotificationChannel channel = AndroidNotificationChannel(
-    'high_importance_channel', // id
-    'High Importance Notifications', // title
-    description:
-    'This channel is used for important notifications.', // description
-    importance: Importance.high,
-    playSound: true);
-
-final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
-FlutterLocalNotificationsPlugin();
+// const AndroidNotificationChannel channel = AndroidNotificationChannel(
+//     'high_importance_channel', // id
+//     'High Importance Notifications', // title
+//     description:
+//     'This channel is used for important notifications.', // description
+//     importance: Importance.high,
+//     playSound: true);
+//
+// final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+// FlutterLocalNotificationsPlugin();
 
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   await Firebase.initializeApp();
@@ -48,33 +47,33 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
 void main() async {
 
   WidgetsFlutterBinding.ensureInitialized();
-  // await Firebase.initializeApp();
+  await Firebase.initializeApp();
   initializedDownload();
-  // FirebaseMessaging.onBackgroundMessage(myForgroundMessageHandler);
-
+  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+  FirebaseMessaging.onBackgroundMessage(myForgroundMessageHandler);
   SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
   // SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
   //   statusBarColor: Colors.transparent, // status bar color
   // ));
   SharedPreferences prefs = await SharedPreferences.getInstance();
+  FirebaseMessaging.instance.getToken().then((value) {
+    String  fcmToken = value!;
+    print("fcm is hererererer ${fcmToken}");
+  });
 
   runApp(
     ChangeNotifierProvider<ThemeNotifier>(
       create: (BuildContext context) {
         String? theme = prefs.getString(APP_THEME);
-
         if (theme == DARK)
           ISDARK = "true";
         else if (theme == LIGHT) ISDARK = "false";
-
         if (theme == null || theme == "" || theme == DEFAULT_SYSTEM) {
           prefs.setString(APP_THEME, DEFAULT_SYSTEM);
           var brightness = SchedulerBinding.instance.window.platformBrightness;
           ISDARK = (brightness == Brightness.dark).toString();
-
           return ThemeNotifier(ThemeMode.system);
         }
-
         return ThemeNotifier(theme == LIGHT ? ThemeMode.light : ThemeMode.dark);
       },
       child: MyApp(sharedPreferences: prefs),
@@ -91,7 +90,6 @@ final GlobalKey<ScaffoldMessengerState> rootScaffoldMessengerKey =
 
 class MyApp extends StatefulWidget {
   late SharedPreferences sharedPreferences;
-
   MyApp({Key? key, required this.sharedPreferences}) : super(key: key);
 
   static void setLocale(BuildContext context, Locale newLocale) {

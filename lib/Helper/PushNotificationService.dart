@@ -261,12 +261,9 @@ class PushNotificationService {
     SettingProvider settingsProvider =
         Provider.of<SettingProvider>(this.context, listen: false);
     var parameter = {USER_ID: settingsProvider.userId, FCM_ID: token};
-
-    Response response =
-        await post(updateFcmApi, body: parameter, headers: headers)
-            .timeout(Duration(seconds: timeOut));
-
+    Response response = await post(updateFcmApi, body: parameter, headers: headers).timeout(Duration(seconds: timeOut));
     var getdata = json.decode(response.body);
+    print("paramatererrre ${parameter}");
   }
 
   Future<void> getProduct(String id, int index, int secPos, bool list) async {
@@ -303,7 +300,6 @@ class PushNotificationService {
 
 Future<dynamic> myForgroundMessageHandler(RemoteMessage message) async {
   setPrefrenceBool(ISFROMBACK, true);
-
   return Future<void>.value();
 }
 

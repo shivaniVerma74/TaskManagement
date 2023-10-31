@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:omega_employee_management/Helper/String.dart';
 import 'package:omega_employee_management/Helper/cropped_container.dart';
 import 'package:omega_employee_management/Provider/SettingProvider.dart';
@@ -65,7 +66,6 @@ class _LoginPagePageState extends State<LoginPage> with TickerProviderStateMixin
     super.initState();
     buttonController = new AnimationController(
         duration: new Duration(milliseconds: 2000), vsync: this);
-
     buttonSqueezeanimation = new Tween(
       begin: deviceWidth! * 0.7,
       end: 50.0,
@@ -76,6 +76,15 @@ class _LoginPagePageState extends State<LoginPage> with TickerProviderStateMixin
         0.150,
       ),
     ));
+   getToken();
+  }
+
+  String? fcmToken;
+  getToken() {
+    FirebaseMessaging.instance.getToken().then((value) {
+      fcmToken = value;
+      print('____sdsdsdfsdf______${fcmToken}_________');
+    });
   }
 
   @override
@@ -175,7 +184,7 @@ class _LoginPagePageState extends State<LoginPage> with TickerProviderStateMixin
 
   Future<void> getLoginUser() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    var data = {USERNAME: emailController.text, PASSWORD: password};
+    var data = {USERNAME: emailController.text, PASSWORD: password, "web_fcm": '${fcmToken}'};
     print("parameter ${data}");
     Response response = await post(getUserLoginApi, body: data, headers: headers).timeout(Duration(seconds: timeOut));
     print("bodyyy ${response.body}");

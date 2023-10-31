@@ -17,6 +17,7 @@ const int perPage = 10;
 // final String baseUrl ='https://rekoindia.com/app/v1/api/';
 // final String baseUrl= 'https://developmentalphawizz.com/referral_management/app/v1/api/';
 final String baseUrl = 'https://developmentalphawizz.com/task_management_new/app/api/';
+final String imageUrl = 'https://developmentalphawizz.com/task_management_new/assets/backend/project/';
     //'https://admin.aimmoney.in/app/v1/api/';
     //'https://developmentalphawizz.com/reko/app/v1/api/';
 

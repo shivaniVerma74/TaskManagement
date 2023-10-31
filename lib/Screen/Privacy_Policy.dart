@@ -211,17 +211,14 @@ class StatePrivacy extends State<PrivacyPolicy> with TickerProviderStateMixin {
           type = ABOUT_US;
         else if (widget.title == getTranslated(context, 'CONTACT_LBL'))
           type = CONTACT_US;
-
         var parameter = {TYPE: type};
-        Response response =
-            await post(getSettingApi, body: parameter, headers: headers)
-                .timeout(Duration(seconds: timeOut));
+        Response response = await post(getPrivacyPolicy, body: parameter, headers: headers).timeout(Duration(seconds: timeOut));
         if (response.statusCode == 200) {
           var getdata = json.decode(response.body);
           bool error = getdata["error"];
           String? msg = getdata["message"];
           if (!error) {
-            privacy = getdata["data"][type][0].toString();
+            privacy = getdata["data"][0].toString();
           } else {
             setSnackbar(msg!);
           }

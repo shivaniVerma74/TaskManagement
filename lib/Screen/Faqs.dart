@@ -138,7 +138,7 @@ class StateFaqs extends State<Faqs> with TickerProviderStateMixin {
             return (index == faqsList.length && isLoadingmore)
                 ? Center(child: CircularProgressIndicator())
                 : listItem(index);
-          },
+            },
         ));
   }
 
@@ -154,14 +154,14 @@ class StateFaqs extends State<Faqs> with TickerProviderStateMixin {
             });
           },
           child: Padding(
-            padding: const EdgeInsets.all(8.0),
+            padding:  EdgeInsets.all(8.0),
             child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
                   Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                      padding:  EdgeInsets.symmetric(horizontal: 8.0),
                       child: Text(
-                        faqsList[index].question!,
+                        faqsList[index].data![index].question!,
                         style: Theme.of(context)
                             .textTheme
                             .subtitle1!
@@ -177,7 +177,7 @@ class StateFaqs extends State<Faqs> with TickerProviderStateMixin {
                               padding: const EdgeInsets.symmetric(
                                   horizontal: 8.0),
                               child: Text(
-                                faqsList[index].answer!,
+                                faqsList[index].data![index].answer!,
                                 style: Theme.of(context)
                                     .textTheme
                                     .subtitle2!
@@ -188,8 +188,7 @@ class StateFaqs extends State<Faqs> with TickerProviderStateMixin {
                               ))),
                       Icon(Icons.keyboard_arrow_down)
                     ],
-                  )
-                      : Row(
+                  ): Row(
                       mainAxisAlignment: MainAxisAlignment.start,
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
@@ -198,7 +197,7 @@ class StateFaqs extends State<Faqs> with TickerProviderStateMixin {
                                 padding: const EdgeInsets.symmetric(
                                     horizontal: 8.0),
                                 child: Text(
-                                  faqsList[index].answer!,
+                                  faqsList[index].data![index].answer!,
                                   style: Theme.of(context)
                                       .textTheme
                                       .subtitle2!
@@ -220,14 +219,11 @@ class StateFaqs extends State<Faqs> with TickerProviderStateMixin {
             .timeout(Duration(seconds: timeOut));
         if (response.statusCode == 200) {
           var getdata = json.decode(response.body);
-
           bool error = getdata["error"];
           String? msg = getdata["message"];
           if (!error) {
             var data = getdata["data"];
-            faqsList = (data as List)
-                .map((data) => new FaqsModel.fromJson(data))
-                .toList();
+            faqsList = (data as List).map((data) => new FaqsModel.fromJson(data)).toList();
           } else {
             setSnackbar(msg!);
           }

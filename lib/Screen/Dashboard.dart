@@ -221,18 +221,20 @@ class _HomePageState extends State<Dashboard> with TickerProviderStateMixin {
     return AppBar(
       centerTitle: _selBottom == 0 ? true : false,
       title: _selBottom == 0
-          ? Image.asset(
-              'assets/images/homelogo.png',
-              //height: 40,
-              //   width: 200,
-              height: 120,
-              //s
-              // width: 45,
-            )
+          ? Text("Task Management", style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: Colors.white),)
+      // Image.asset(
+      //         'assets/images/homelogo.png',
+      //         //height: 40,
+      //         //   width: 200,
+      //         height: 120,
+      //         //s
+      //         // width: 45,
+      //       )
           : Text(
               title!,
               style: TextStyle(
-                  color: colors.primary, fontWeight: FontWeight.normal),
+                  color: colors.primary, fontWeight: FontWeight.normal,
+              ),
             ),
         leading: _selBottom == 0
           ? IconButton(
