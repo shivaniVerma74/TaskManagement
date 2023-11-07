@@ -48,12 +48,12 @@ class TaskData {
   String? dateCreated;
   String? updateStatus;
   List<Comments>? comments;
-  List<TaskFile>? file;
+  //List<TaskFile>? file;
   String? taskCreator;
   List<String>? users;
 
   TaskData({this.id, this.workspaceId, this.projectId, this.userId, this.milestoneId,
-  this.title, this.description, this.priority, this.taskType, this.dueDate, this.status, this.createdBy, this.assignedTo, this.class1, this.commentCount, this.startDate, this.dateCreated, this.comments, this.file, this.taskCreator, this.users});
+  this.title, this.description, this.priority, this.taskType, this.dueDate, this.status, this.createdBy, this.assignedTo, this.class1, this.commentCount, this.startDate, this.dateCreated, this.comments, this.taskCreator, this.users});
 
   TaskData.fromJson(Map<String, dynamic> json) {
   id = json['id'];
@@ -78,10 +78,10 @@ class TaskData {
   comments = <Comments>[];
   json['comments'].forEach((v) { comments!.add(new Comments.fromJson(v)); });
   }
-  if (json['file'] != null) {
-  file = <TaskFile>[];
-  json['file'].forEach((v) { file!.add(new TaskFile.fromJson(v)); });
-  }
+  // if (json['file'] != null) {
+  // file = <TaskFile>[];
+  // json['file'].forEach((v) { file!.add(new TaskFile.fromJson(v)); });
+  // }
   taskCreator = json['task_creator'];
   users = json['users'].cast<String>();
   }
@@ -109,9 +109,9 @@ class TaskData {
   if (this.comments != null) {
   data['comments'] = this.comments!.map((v) => v.toJson()).toList();
   }
-  if (this.file != null) {
-  data['file'] = this.file!.map((v) => v.toJson()).toList();
-  }
+  // if (this.file != null) {
+  // data['file'] = this.file!.map((v) => v.toJson()).toList();
+  // }
   data['task_creator'] = this.taskCreator;
   data['users'] = this.users;
   return data;

@@ -81,8 +81,6 @@
   "SKIP": "Skip",
   "VERIFY_AND_PROCEED": "Verify and proceed",
   "DIDNT_GET_THE_CODE": "Didn't get the code? ",
-
-
   "RESEND_OTP": "Resend OTP",
   "SEND_OTP": "Send OTP",
   "FORGOT_PASSWORDTITILE": "Forgot Password",
@@ -178,8 +176,6 @@
   "EDIT_PROFILE_LBL": "Edit Profile",
   "LOGIN_REGISTER_LBL": "Login",
   "LOGIN_LBL": "Login",
-
-
   "MY_ORDERS_LBL": "My Orders",
   "MY_PROFILE_LBL": "My Profile",
   "MANAGE_ADD_LBL": "Manage Address",
@@ -222,6 +218,7 @@
   "HINDI_LAN": "Hindi",
   "ARABIC_LAN": "Arabic",
   "RUSSIAN_LAN": "Russian",
+  "BENGALI": "Bengali",
   "JAPANISE_LAN": "Japanese",
   "GERMAN_LAN": "German",
   "SUBMIT_LBL": "SUBMIT",
@@ -386,5 +383,6 @@
   "SELECTENDDATE": "Select End Date",
   "DATEWARNING": "Date is required",
   "TITLE": "Title :",
-  "": ""
+  "DUTY_STATUS": "Duty Status",
+  "TASK_STATUS": "Task Status"
 }

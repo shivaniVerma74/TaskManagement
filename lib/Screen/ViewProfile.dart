@@ -59,11 +59,11 @@ class _ViewProfileState extends State<ViewProfile> {
           firstNameC.text = userdataModel?.data?.firstName ?? '';
           lastNameC.text = userdataModel?.data?.lastName ?? '';
           DobC.text = userdataModel?.data?.dob ?? '';
-          emailC.text=userdataModel?.data?.email ??'';
-          phoneC.text=userdataModel?.data?.phone ??'';
-          alternatenumC.text=userdataModel?.data?.alternateNumber ??'';
-          bloodgroupC.text=userdataModel?.data?.bludGroup ??'';
-          addressC.text=userdataModel?.data?.address ??'';
+          emailC.text=userdataModel?.data?.email ?? '';
+          phoneC.text=userdataModel?.data?.phone ?? '';
+          alternatenumC.text=userdataModel?.data?.alternatePhone?? '';
+          bloodgroupC.text=userdataModel?.data?.bludGroup ?? '';
+          addressC.text=userdataModel?.data?.address ?? '';
           shiftC.text = userdataModel?.data?.shift ?? '';
           setState(() {});
         }
@@ -354,7 +354,7 @@ class _ViewProfileState extends State<ViewProfile> {
                           labelText: "Blood Group"
                       ),
                   ),    //bloodgroup
-                  SizedBox(height: 12,),
+                  SizedBox(height: 12),
                   TextFormField(
                       controller:alternatenumC ,
                       keyboardType: TextInputType.number,
@@ -375,15 +375,6 @@ class _ViewProfileState extends State<ViewProfile> {
                           labelText: "Address"
                       ),
                   ),
-                  SizedBox(height: 12),
-                  TextFormField(
-                    controller: shiftC,
-                    decoration: InputDecoration(
-                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-                        hintText: "Shift",
-                        labelText: "Shift"
-                    ),
-                  ),
                   SizedBox(height: 40),
                   GestureDetector(
                     onTap: () {
@@ -393,7 +384,7 @@ class _ViewProfileState extends State<ViewProfile> {
                       height: 50,
                       decoration: BoxDecoration(color: colors.primary,
                           borderRadius: BorderRadius.circular(10)),
-                      child: Center(child: Text("Update",style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold))),
+                      child: Center(child: Text(getTranslated(context, 'UPDATE_PROFILE_LBL')!, style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold))),
                     ),
                   ),
                   SizedBox(height: 40),

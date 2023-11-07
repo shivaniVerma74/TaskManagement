@@ -573,8 +573,8 @@ Locale _locale(String languageCode) {
       return Locale("hi", "IN");
     case "ar":
       return Locale("ar", "DZ");
-    case "ru":
-      return Locale("ru", "RU");
+    case "bn":
+      return Locale("bn", "");
     case "ja":
       return Locale("ja", "JP");
     case "de":
@@ -585,7 +585,7 @@ Locale _locale(String languageCode) {
 }
 
 String? getTranslated(BuildContext context, String key) {
-  return DemoLocalization.of(context)!.translate(key);
+  return DemoLocalization.of(context)?.translate(key);
 }
 
 String getToken() {

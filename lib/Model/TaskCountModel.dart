@@ -65,7 +65,7 @@ class Data {
   String? _pendingTask;
   String? _completeTasks;
   String? _allTasks;
-Data copyWith({  String? pendingTask,
+Data copyWith({String? pendingTask,
   String? completeTasks,
   String? allTasks,
 }) => Data(  pendingTask: pendingTask ?? _pendingTask,

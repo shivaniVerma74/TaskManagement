@@ -46,7 +46,6 @@ class _ChatState extends State<Chat> {
     CUR_TICK_ID = widget.id;
     // FlutterDownloader.registerCallback();
     setupChannel();
-
     getMsg();
   }
 
@@ -67,7 +66,7 @@ class _ChatState extends State<Chat> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: getAppBar(getTranslated(context, 'CHAT')!, context),
+      // appBar: getAppBar(getTranslated(context, 'CHAT')!, context),
       body: Column(
         children: <Widget>[buildListMessage(), msgRow()],
       ),
@@ -85,7 +84,6 @@ class _ChatState extends State<Chat> {
         String mid;
         message = Model.fromJson(data);
         print("maesssasanseeeee ${message.userFrom}");
-
         chatList.insert(0, message);
         // files.clear();
       });

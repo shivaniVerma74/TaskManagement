@@ -1,12 +1,12 @@
 /// error : false
 /// message : "Welcome !"
-/// data : {"user_id":"41","check_in":"08:28:01","date":"2023-10-19","user_status":"OnLeave","punchout_time":"20:28:01"}
+/// data : {"user_id":"33","check_in":"03:02:39 PM","date":"2023-10-3","user_status":"Compensatory Holiday","shift":null,"punchout_time":"20:28:01","status":"1"}
 
 class PunchInModel {
   PunchInModel({
       bool? error, 
-      String? message,
-    PunchInData? data,}){
+      String? message, 
+      Data? data,}){
     _error = error;
     _message = message;
     _data = data;
@@ -15,21 +15,21 @@ class PunchInModel {
   PunchInModel.fromJson(dynamic json) {
     _error = json['error'];
     _message = json['message'];
-    _data = json['data'] != null ? PunchInData.fromJson(json['data']) : null;
+    _data = json['data'] != null ? Data.fromJson(json['data']) : null;
   }
   bool? _error;
   String? _message;
-  PunchInData? _data;
+  Data? _data;
 PunchInModel copyWith({  bool? error,
   String? message,
-  PunchInData? data,
+  Data? data,
 }) => PunchInModel(  error: error ?? _error,
   message: message ?? _message,
   data: data ?? _data,
 );
   bool? get error => _error;
   String? get message => _message;
-  PunchInData? get data => _data;
+  Data? get data => _data;
 
   Map<String, dynamic> toJson() {
     final map = <String, dynamic>{};
@@ -43,54 +43,70 @@ PunchInModel copyWith({  bool? error,
 
 }
 
-/// user_id : "41"
-/// check_in : "08:28:01"
-/// date : "2023-10-19"
-/// user_status : "OnLeave"
+/// user_id : "33"
+/// check_in : "03:02:39 PM"
+/// date : "2023-10-3"
+/// user_status : "Compensatory Holiday"
+/// shift : null
 /// punchout_time : "20:28:01"
+/// status : "1"
 
-class PunchInData {
-  PunchInData({
+class Data {
+  Data({
       String? userId, 
       String? checkIn, 
       String? date, 
       String? userStatus, 
-      String? punchoutTime,}){
+      dynamic shift, 
+      String? punchoutTime, 
+      String? status,}){
     _userId = userId;
     _checkIn = checkIn;
     _date = date;
     _userStatus = userStatus;
+    _shift = shift;
     _punchoutTime = punchoutTime;
+    _status = status;
 }
 
-  PunchInData.fromJson(dynamic json) {
+  Data.fromJson(dynamic json) {
     _userId = json['user_id'];
     _checkIn = json['check_in'];
     _date = json['date'];
     _userStatus = json['user_status'];
+    _shift = json['shift'];
     _punchoutTime = json['punchout_time'];
+    _status = json['status'];
   }
   String? _userId;
   String? _checkIn;
   String? _date;
   String? _userStatus;
+  dynamic _shift;
   String? _punchoutTime;
-  PunchInData copyWith({  String? userId,
+  String? _status;
+Data copyWith({  String? userId,
   String? checkIn,
   String? date,
   String? userStatus,
+  dynamic shift,
   String? punchoutTime,
-}) => PunchInData(  userId: userId ?? _userId,
+  String? status,
+}) => Data(  userId: userId ?? _userId,
   checkIn: checkIn ?? _checkIn,
   date: date ?? _date,
   userStatus: userStatus ?? _userStatus,
+  shift: shift ?? _shift,
   punchoutTime: punchoutTime ?? _punchoutTime,
+  status: status ?? _status,
 );
   String? get userId => _userId;
   String? get checkIn => _checkIn;
   String? get date => _date;
   String? get userStatus => _userStatus;
+  dynamic get shift => _shift;
   String? get punchoutTime => _punchoutTime;
+  String? get status => _status;
 
   Map<String, dynamic> toJson() {
     final map = <String, dynamic>{};
@@ -98,7 +114,10 @@ class PunchInData {
     map['check_in'] = _checkIn;
     map['date'] = _date;
     map['user_status'] = _userStatus;
+    map['shift'] = _shift;
     map['punchout_time'] = _punchoutTime;
+    map['status'] = _status;
     return map;
   }
+
 }

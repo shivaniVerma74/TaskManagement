@@ -1,12 +1,12 @@
 /// error : false
 /// message : "Profile Get Sucessfully"
-/// data : {"id":"24","first_name":"Yash","last_name":"Younis","workspace_id":"54","ip_address":"157.51.146.247","username":"e.younis@khusheim.com","password":"$2y$10$fVxbkdargbkUzKVQevBqSuUSNKQWr80QdKx9qrqITo6GBUs42e/fS","email":"e.younis@khusheim.com","activation_selector":null,"activation_code":null,"forgotten_password_selector":null,"forgotten_password_code":null,"forgotten_password_time":null,"remember_selector":null,"remember_code":null,"created_on":"1662192448","last_login":"1698653385","active":"1","address":"","city":"","state":"","zip_code":"","country":"","company":null,"logo":null,"half_logo":null,"favicon":null,"phone":null,"web_fcm":"fQLmBuyLTHS6ctjx1dRUCb:APA91bG8SrX2Hwib-eRD22gUpxchlJshwEQcRQRXD0j5JF72TtM36eRYQHiJW5CCqoD9fBStR49QPbZskaP-Dy9PEhNsA6OeeqbcUZbI8GdzpvUTdgH2buxI0Pzp1ZTWHJMY6J2MQdoT","last_online":"1693477818","lang":"english","chat_theme":"chat-theme-light","profile":null,"email_config":null,"otp":"0","assignee_id":"0","app_status":null,"shift":"Day","dob":"","blud_group":"","alternate_number":""}
+/// data : {"id":"48","first_name":"vishnu","last_name":"Singh","workspace_id":"77","ip_address":"182.77.72.223","username":"VishnuJ","password":"$2y$10$DAZhkxHwpDNi3l3r.UnOCuPMZoV75HZpbm1Hc1my5uJWVtBpQJiQu","email":"vishnu@gmail.com","activation_selector":null,"activation_code":null,"forgotten_password_selector":null,"forgotten_password_code":null,"forgotten_password_time":null,"remember_selector":null,"remember_code":null,"created_on":"1699012553","last_login":"1699013057","active":"1","address":"","city":"","state":"","zip_code":"","country":"","company":null,"logo":null,"half_logo":null,"favicon":null,"phone":"7855999985","alternate_phone":"7452102030","web_fcm":"ex73rZ0aTwSHNuWSPMTqXs:APA91bHirxG1zE2Og5Ip_x5kX8OQFopGsgyNennfwrrXYB5_ijRzCDMa7_r2jJw9Fv_ZijHBHl2h8eY0U7hFZ8RaBeiJILe6mSTAKOl4WPOh4JA0W4XwuQss1bqivg8CcfenaIGDFESX","last_online":"0","lang":"english","chat_theme":"chat-theme-light","profile":null,"email_config":null,"otp":"0","assignee_id":"0","app_status":null,"shift":"Day","dob":null,"blud_group":null,"alternate_number":null}
 
 class GetUserProfileModel {
   GetUserProfileModel({
       bool? error, 
-      String? message,
-    UserData? data,}){
+      String? message, 
+      Data? data,}){
     _error = error;
     _message = message;
     _data = data;
@@ -15,21 +15,21 @@ class GetUserProfileModel {
   GetUserProfileModel.fromJson(dynamic json) {
     _error = json['error'];
     _message = json['message'];
-    _data = json['data'] != null ? UserData.fromJson(json['data']) : null;
+    _data = json['data'] != null ? Data.fromJson(json['data']) : null;
   }
   bool? _error;
   String? _message;
-  UserData? _data;
+  Data? _data;
 GetUserProfileModel copyWith({  bool? error,
   String? message,
-  UserData? data,
+  Data? data,
 }) => GetUserProfileModel(  error: error ?? _error,
   message: message ?? _message,
   data: data ?? _data,
 );
   bool? get error => _error;
   String? get message => _message;
-  UserData? get data => _data;
+  Data? get data => _data;
 
   Map<String, dynamic> toJson() {
     final map = <String, dynamic>{};
@@ -40,16 +40,17 @@ GetUserProfileModel copyWith({  bool? error,
     }
     return map;
   }
+
 }
 
-/// id : "24"
-/// first_name : "Yash"
-/// last_name : "Younis"
-/// workspace_id : "54"
-/// ip_address : "157.51.146.247"
-/// username : "e.younis@khusheim.com"
-/// password : "$2y$10$fVxbkdargbkUzKVQevBqSuUSNKQWr80QdKx9qrqITo6GBUs42e/fS"
-/// email : "e.younis@khusheim.com"
+/// id : "48"
+/// first_name : "vishnu"
+/// last_name : "Singh"
+/// workspace_id : "77"
+/// ip_address : "182.77.72.223"
+/// username : "VishnuJ"
+/// password : "$2y$10$DAZhkxHwpDNi3l3r.UnOCuPMZoV75HZpbm1Hc1my5uJWVtBpQJiQu"
+/// email : "vishnu@gmail.com"
 /// activation_selector : null
 /// activation_code : null
 /// forgotten_password_selector : null
@@ -57,8 +58,8 @@ GetUserProfileModel copyWith({  bool? error,
 /// forgotten_password_time : null
 /// remember_selector : null
 /// remember_code : null
-/// created_on : "1662192448"
-/// last_login : "1698653385"
+/// created_on : "1699012553"
+/// last_login : "1699013057"
 /// active : "1"
 /// address : ""
 /// city : ""
@@ -69,9 +70,10 @@ GetUserProfileModel copyWith({  bool? error,
 /// logo : null
 /// half_logo : null
 /// favicon : null
-/// phone : null
-/// web_fcm : "fQLmBuyLTHS6ctjx1dRUCb:APA91bG8SrX2Hwib-eRD22gUpxchlJshwEQcRQRXD0j5JF72TtM36eRYQHiJW5CCqoD9fBStR49QPbZskaP-Dy9PEhNsA6OeeqbcUZbI8GdzpvUTdgH2buxI0Pzp1ZTWHJMY6J2MQdoT"
-/// last_online : "1693477818"
+/// phone : "7855999985"
+/// alternate_phone : "7452102030"
+/// web_fcm : "ex73rZ0aTwSHNuWSPMTqXs:APA91bHirxG1zE2Og5Ip_x5kX8OQFopGsgyNennfwrrXYB5_ijRzCDMa7_r2jJw9Fv_ZijHBHl2h8eY0U7hFZ8RaBeiJILe6mSTAKOl4WPOh4JA0W4XwuQss1bqivg8CcfenaIGDFESX"
+/// last_online : "0"
 /// lang : "english"
 /// chat_theme : "chat-theme-light"
 /// profile : null
@@ -80,12 +82,12 @@ GetUserProfileModel copyWith({  bool? error,
 /// assignee_id : "0"
 /// app_status : null
 /// shift : "Day"
-/// dob : ""
-/// blud_group : ""
-/// alternate_number : ""
+/// dob : null
+/// blud_group : null
+/// alternate_number : null
 
-class UserData {
-  UserData({
+class Data {
+  Data({
       String? id, 
       String? firstName, 
       String? lastName, 
@@ -113,7 +115,8 @@ class UserData {
       dynamic logo, 
       dynamic halfLogo, 
       dynamic favicon, 
-      dynamic phone, 
+      String? phone, 
+      String? alternatePhone, 
       String? webFcm, 
       String? lastOnline, 
       String? lang, 
@@ -124,9 +127,9 @@ class UserData {
       String? assigneeId, 
       dynamic appStatus, 
       String? shift, 
-      String? dob, 
-      String? bludGroup, 
-      String? alternateNumber,}){
+      dynamic dob, 
+      dynamic bludGroup, 
+      dynamic alternateNumber,}){
     _id = id;
     _firstName = firstName;
     _lastName = lastName;
@@ -155,6 +158,7 @@ class UserData {
     _halfLogo = halfLogo;
     _favicon = favicon;
     _phone = phone;
+    _alternatePhone = alternatePhone;
     _webFcm = webFcm;
     _lastOnline = lastOnline;
     _lang = lang;
@@ -170,7 +174,7 @@ class UserData {
     _alternateNumber = alternateNumber;
 }
 
-  UserData.fromJson(dynamic json) {
+  Data.fromJson(dynamic json) {
     _id = json['id'];
     _firstName = json['first_name'];
     _lastName = json['last_name'];
@@ -199,6 +203,7 @@ class UserData {
     _halfLogo = json['half_logo'];
     _favicon = json['favicon'];
     _phone = json['phone'];
+    _alternatePhone = json['alternate_phone'];
     _webFcm = json['web_fcm'];
     _lastOnline = json['last_online'];
     _lang = json['lang'];
@@ -240,7 +245,8 @@ class UserData {
   dynamic _logo;
   dynamic _halfLogo;
   dynamic _favicon;
-  dynamic _phone;
+  String? _phone;
+  String? _alternatePhone;
   String? _webFcm;
   String? _lastOnline;
   String? _lang;
@@ -251,10 +257,10 @@ class UserData {
   String? _assigneeId;
   dynamic _appStatus;
   String? _shift;
-  String? _dob;
-  String? _bludGroup;
-  String? _alternateNumber;
-  UserData copyWith({  String? id,
+  dynamic _dob;
+  dynamic _bludGroup;
+  dynamic _alternateNumber;
+Data copyWith({  String? id,
   String? firstName,
   String? lastName,
   String? workspaceId,
@@ -281,7 +287,8 @@ class UserData {
   dynamic logo,
   dynamic halfLogo,
   dynamic favicon,
-  dynamic phone,
+  String? phone,
+  String? alternatePhone,
   String? webFcm,
   String? lastOnline,
   String? lang,
@@ -292,10 +299,10 @@ class UserData {
   String? assigneeId,
   dynamic appStatus,
   String? shift,
-  String? dob,
-  String? bludGroup,
-  String? alternateNumber,
-}) => UserData(  id: id ?? _id,
+  dynamic dob,
+  dynamic bludGroup,
+  dynamic alternateNumber,
+}) => Data(  id: id ?? _id,
   firstName: firstName ?? _firstName,
   lastName: lastName ?? _lastName,
   workspaceId: workspaceId ?? _workspaceId,
@@ -323,6 +330,7 @@ class UserData {
   halfLogo: halfLogo ?? _halfLogo,
   favicon: favicon ?? _favicon,
   phone: phone ?? _phone,
+  alternatePhone: alternatePhone ?? _alternatePhone,
   webFcm: webFcm ?? _webFcm,
   lastOnline: lastOnline ?? _lastOnline,
   lang: lang ?? _lang,
@@ -364,7 +372,8 @@ class UserData {
   dynamic get logo => _logo;
   dynamic get halfLogo => _halfLogo;
   dynamic get favicon => _favicon;
-  dynamic get phone => _phone;
+  String? get phone => _phone;
+  String? get alternatePhone => _alternatePhone;
   String? get webFcm => _webFcm;
   String? get lastOnline => _lastOnline;
   String? get lang => _lang;
@@ -375,9 +384,9 @@ class UserData {
   String? get assigneeId => _assigneeId;
   dynamic get appStatus => _appStatus;
   String? get shift => _shift;
-  String? get dob => _dob;
-  String? get bludGroup => _bludGroup;
-  String? get alternateNumber => _alternateNumber;
+  dynamic get dob => _dob;
+  dynamic get bludGroup => _bludGroup;
+  dynamic get alternateNumber => _alternateNumber;
 
   Map<String, dynamic> toJson() {
     final map = <String, dynamic>{};
@@ -409,6 +418,7 @@ class UserData {
     map['half_logo'] = _halfLogo;
     map['favicon'] = _favicon;
     map['phone'] = _phone;
+    map['alternate_phone'] = _alternatePhone;
     map['web_fcm'] = _webFcm;
     map['last_online'] = _lastOnline;
     map['lang'] = _lang;

@@ -1,256 +1,435 @@
-import 'dart:async';
+// import 'dart:async';
+// import 'dart:convert';
+// import 'package:omega_employee_management/Helper/Session.dart';
+// import 'package:omega_employee_management/Model/Faqs_Model.dart';
+// import 'package:flutter/cupertino.dart';
+// import 'package:flutter/material.dart';
+// import 'package:http/http.dart';
+// import '../Helper/AppBtn.dart';
+// import '../Helper/Color.dart';
+// import '../Helper/Constant.dart';
+// import '../Helper/String.dart';
+//
+// class Faqs extends StatefulWidget {
+//   final String? title;
+//
+//   const Faqs({Key? key, this.title}) : super(key: key);
+//
+//   @override
+//   State<StatefulWidget> createState() {
+//     return StateFaqs();
+//   }
+// }
+//
+// class StateFaqs extends State<Faqs> with TickerProviderStateMixin {
+//   bool _isLoading = true;
+//   final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
+//   String? privacy;
+//   Animation? buttonSqueezeanimation;
+//   AnimationController? buttonController;
+//   bool _isNetworkAvail = true;
+//   List<FaqsModel> faqsList = [];
+//   List<String> selectedId = [];
+//   int selectedIndex = -1;
+//   List toggled = [];
+//   bool flag = true;
+//   bool expand = true;
+//   bool isLoadingmore = true;
+//   ScrollController controller = new ScrollController();
+//
+//
+//   @override
+//   void initState() {
+//     super.initState();
+//     controller.addListener(_scrollListener);
+//     getFaqs();
+//     buttonController = new AnimationController(
+//         duration: new Duration(milliseconds: 2000), vsync: this);
+//
+//     buttonSqueezeanimation = new Tween(
+//       begin: deviceWidth! * 0.7,
+//       end: 50.0,
+//     ).animate(new CurvedAnimation(
+//       parent: buttonController!,
+//       curve: new Interval(
+//         0.0,
+//         0.150,
+//       ),
+//     ));
+//   }
+//
+//   @override
+//   void dispose() {
+//     buttonController!.dispose();
+//     controller.removeListener(() {});
+//     super.dispose();
+//   }
+//
+//   _scrollListener() {
+//     if (controller.offset >= controller.position.maxScrollExtent &&
+//         !controller.position.outOfRange) {
+//       if (this.mounted) {
+//          if (mounted) setState(() {
+//           isLoadingmore = true;
+//           getFaqs();
+//         });
+//       }
+//     }
+//   }
+//
+//   Future<Null> _playAnimation() async {
+//     try {
+//       await buttonController!.forward();
+//     } on TickerCanceled {}
+//   }
+//
+//   Widget noInternet(BuildContext context) {
+//     return Center(
+//       child: SingleChildScrollView(
+//         child: Column(mainAxisSize: MainAxisSize.min, children: [
+//           noIntImage(),
+//           noIntText(context),
+//           noIntDec(context),
+//           AppBtn(
+//             title: getTranslated(context, 'TRY_AGAIN_INT_LBL'),
+//             btnAnim: buttonSqueezeanimation,
+//             btnCntrl: buttonController,
+//             onBtnSelected: () async {
+//               _playAnimation();
+//
+//               Future.delayed(Duration(seconds: 2)).then((_) async {
+//                 _isNetworkAvail = await isNetworkAvailable();
+//                 if (_isNetworkAvail) {
+//                   Navigator.pushReplacement(
+//                       context,
+//                       MaterialPageRoute(
+//                           builder: (BuildContext context) => super.widget));
+//                 } else {
+//                   await buttonController!.reverse();
+//                    if (mounted) setState(() {});
+//                 }
+//               });
+//             },
+//           )
+//         ]),
+//       ),
+//     );
+//   }
+//
+//   @override
+//   Widget build(BuildContext context) {
+//     return Scaffold(
+//
+//         key: _scaffoldKey,
+//         appBar: getSimpleAppBar(widget.title!, context),
+//         body: _isNetworkAvail ? _showForm(context) : noInternet(context));
+//   }
+//
+//   _showForm(BuildContext context) {
+//     return Padding(
+//         padding: EdgeInsets.all(10.0),
+//         child: _isLoading
+//             ? shimmer(context)
+//             : ListView.builder(
+//           controller: controller,
+//           itemCount: faqsList.length,
+//           physics: BouncingScrollPhysics(),
+//           itemBuilder: (context, index) {
+//             return (index == faqsList.length && isLoadingmore)
+//                 ? Center(child: CircularProgressIndicator())
+//                 : listItem(index);
+//             },
+//         ));
+//   }
+//
+//   listItem(int index) {
+//     return Card(
+//         elevation: 0,
+//         child: InkWell(
+//           borderRadius: BorderRadius.circular(4),
+//           onTap: () {
+//              if (mounted) setState(() {
+//               selectedIndex = index;
+//               flag = !flag;
+//             });
+//           },
+//           child: Padding(
+//             padding:  EdgeInsets.all(8.0),
+//             child: Column(
+//                 crossAxisAlignment: CrossAxisAlignment.start,
+//                 children: <Widget>[
+//                   Padding(
+//                       padding:  EdgeInsets.symmetric(horizontal: 8.0),
+//                       child: Text(
+//                         faqsList[index].data![index].question!,
+//                         style: Theme.of(context)
+//                             .textTheme
+//                             .subtitle1!
+//                             .copyWith(color: Theme.of(context).colorScheme.lightBlack),
+//                       )),
+//                   selectedIndex != index || flag
+//                       ? Row(
+//                     mainAxisAlignment: MainAxisAlignment.start,
+//                     crossAxisAlignment: CrossAxisAlignment.center,
+//                     children: [
+//                       Expanded(
+//                           child: Padding(
+//                               padding: const EdgeInsets.symmetric(
+//                                   horizontal: 8.0),
+//                               child: Text(
+//                                 faqsList[index].data![index].answer!,
+//                                 style: Theme.of(context)
+//                                     .textTheme
+//                                     .subtitle2!
+//                                     .copyWith(
+//                                     color: Theme.of(context).colorScheme.black.withOpacity(0.7)),
+//                                 maxLines: 1,
+//                                 overflow: TextOverflow.ellipsis,
+//                               ))),
+//                       Icon(Icons.keyboard_arrow_down)
+//                     ],
+//                   ): Row(
+//                       mainAxisAlignment: MainAxisAlignment.start,
+//                       crossAxisAlignment: CrossAxisAlignment.center,
+//                       children: [
+//                         Expanded(
+//                             child: Padding(
+//                                 padding: const EdgeInsets.symmetric(
+//                                     horizontal: 8.0),
+//                                 child: Text(
+//                                   faqsList[index].data![index].answer!,
+//                                   style: Theme.of(context)
+//                                       .textTheme
+//                                       .subtitle2!
+//                                       .copyWith(
+//                                       color: Theme.of(context).colorScheme.black.withOpacity(0.7)),
+//                                 ))),
+//                         Icon(Icons.keyboard_arrow_up)
+//                       ]),
+//                 ]),
+//           ),
+//         ));
+//   }
+//
+//   Future<void> getFaqs() async {
+//     _isNetworkAvail = await isNetworkAvailable();
+//     if (_isNetworkAvail) {
+//       try {
+//         Response response = await post(getFaqsApi, headers: headers)
+//             .timeout(Duration(seconds: timeOut));
+//         if (response.statusCode == 200) {
+//           var getdata = json.decode(response.body);
+//           bool error = getdata["error"];
+//           String? msg = getdata["message"];
+//           if (!error) {
+//             var data = getdata["data"];
+//             faqsList = (data as List).map((data) => new FaqsModel.fromJson(data)).toList();
+//           } else {
+//             setSnackbar(msg!);
+//           }
+//         }
+//          if (mounted) setState(() {
+//           _isLoading = false;
+//         });
+//       } on TimeoutException catch (_) {
+//         setSnackbar( getTranslated(context,'somethingMSg')!);
+//       }
+//     } else {
+//        if (mounted) setState(() {
+//         _isLoading = false;
+//         _isNetworkAvail = false;
+//       });
+//     }
+//   }
+//
+//   setSnackbar(String msg) {
+//   ScaffoldMessenger.of(context).showSnackBar(new SnackBar(
+//       content: new Text(
+//         msg,
+//         textAlign: TextAlign.center,
+//         style: TextStyle(color: Theme.of(context).colorScheme.black),
+//       ),
+//       backgroundColor: Theme.of(context).colorScheme.white,
+//       elevation: 1.0,
+//     ));
+//   }
+// }
+
+
 import 'dart:convert';
-import 'package:omega_employee_management/Helper/Session.dart';
-import 'package:omega_employee_management/Model/Faqs_Model.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart';
-import '../Helper/AppBtn.dart';
+import 'package:http/http.dart' as http;
 import '../Helper/Color.dart';
-import '../Helper/Constant.dart';
 import '../Helper/String.dart';
+import '../Model/FaqModel.dart';
 
-class Faqs extends StatefulWidget {
+class FaqScreen extends StatefulWidget {
   final String? title;
-
-  const Faqs({Key? key, this.title}) : super(key: key);
+  const FaqScreen({Key? key, this.title}) : super(key: key);
 
   @override
-  State<StatefulWidget> createState() {
-    return StateFaqs();
-  }
+  State<FaqScreen> createState() => _FaqScreenState();
 }
 
-class StateFaqs extends State<Faqs> with TickerProviderStateMixin {
-  bool _isLoading = true;
-  final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
-  String? privacy;
-  Animation? buttonSqueezeanimation;
-  AnimationController? buttonController;
-  bool _isNetworkAvail = true;
-  List<FaqsModel> faqsList = [];
-  List<String> selectedId = [];
-  int selectedIndex = -1;
-  List toggled = [];
+class _FaqScreenState extends State<FaqScreen> {
+  ScrollController controller = new ScrollController();
   bool flag = true;
   bool expand = true;
-  bool isLoadingmore = true;
-  ScrollController controller = new ScrollController();
-
+  int selectedIndex = -1;
 
   @override
   void initState() {
+    // TODO: implement initState
     super.initState();
     controller.addListener(_scrollListener);
-    getFaqs();
-    buttonController = new AnimationController(
-        duration: new Duration(milliseconds: 2000), vsync: this);
-
-    buttonSqueezeanimation = new Tween(
-      begin: deviceWidth! * 0.7,
-      end: 50.0,
-    ).animate(new CurvedAnimation(
-      parent: buttonController!,
-      curve: new Interval(
-        0.0,
-        0.150,
-      ),
-    ));
-  }
-
-  @override
-  void dispose() {
-    buttonController!.dispose();
-    controller.removeListener(() {});
-    super.dispose();
   }
 
   _scrollListener() {
     if (controller.offset >= controller.position.maxScrollExtent &&
         !controller.position.outOfRange) {
       if (this.mounted) {
-         if (mounted) setState(() {
-          isLoadingmore = true;
-          getFaqs();
+        if (mounted) setState(() {
+          // isLoadingmore = true;
+          getFaq();
         });
       }
     }
-  }
-
-  Future<Null> _playAnimation() async {
-    try {
-      await buttonController!.forward();
-    } on TickerCanceled {}
-  }
-
-  Widget noInternet(BuildContext context) {
-    return Center(
-      child: SingleChildScrollView(
-        child: Column(mainAxisSize: MainAxisSize.min, children: [
-          noIntImage(),
-          noIntText(context),
-          noIntDec(context),
-          AppBtn(
-            title: getTranslated(context, 'TRY_AGAIN_INT_LBL'),
-            btnAnim: buttonSqueezeanimation,
-            btnCntrl: buttonController,
-            onBtnSelected: () async {
-              _playAnimation();
-
-              Future.delayed(Duration(seconds: 2)).then((_) async {
-                _isNetworkAvail = await isNetworkAvailable();
-                if (_isNetworkAvail) {
-                  Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(
-                          builder: (BuildContext context) => super.widget));
-                } else {
-                  await buttonController!.reverse();
-                   if (mounted) setState(() {});
-                }
-              });
-            },
-          )
-        ]),
-      ),
-    );
   }
 
   @override
   Widget build(BuildContext context) {
+    // SizeConfig().init(context);
     return Scaffold(
-
-        key: _scaffoldKey,
-        appBar: getSimpleAppBar(widget.title!, context),
-        body: _isNetworkAvail ? _showForm(context) : noInternet(context));
-  }
-
-  _showForm(BuildContext context) {
-    return Padding(
-        padding: EdgeInsets.all(10.0),
-        child: _isLoading
-            ? shimmer(context)
-            : ListView.builder(
-          controller: controller,
-          itemCount: faqsList.length,
-          physics: BouncingScrollPhysics(),
-          itemBuilder: (context, index) {
-            return (index == faqsList.length && isLoadingmore)
-                ? Center(child: CircularProgressIndicator())
-                : listItem(index);
-            },
-        ));
-  }
-
-  listItem(int index) {
-    return Card(
-        elevation: 0,
-        child: InkWell(
-          borderRadius: BorderRadius.circular(4),
-          onTap: () {
-             if (mounted) setState(() {
-              selectedIndex = index;
-              flag = !flag;
-            });
-          },
-          child: Padding(
-            padding:  EdgeInsets.all(8.0),
-            child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  Padding(
-                      padding:  EdgeInsets.symmetric(horizontal: 8.0),
-                      child: Text(
-                        faqsList[index].data![index].question!,
-                        style: Theme.of(context)
-                            .textTheme
-                            .subtitle1!
-                            .copyWith(color: Theme.of(context).colorScheme.lightBlack),
-                      )),
-                  selectedIndex != index || flag
-                      ? Row(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Expanded(
-                          child: Padding(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 8.0),
-                              child: Text(
-                                faqsList[index].data![index].answer!,
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .subtitle2!
-                                    .copyWith(
-                                    color: Theme.of(context).colorScheme.black.withOpacity(0.7)),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                              ))),
-                      Icon(Icons.keyboard_arrow_down)
-                    ],
-                  ): Row(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        Expanded(
-                            child: Padding(
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 8.0),
-                                child: Text(
-                                  faqsList[index].data![index].answer!,
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .subtitle2!
-                                      .copyWith(
-                                      color: Theme.of(context).colorScheme.black.withOpacity(0.7)),
-                                ))),
-                        Icon(Icons.keyboard_arrow_up)
-                      ]),
-                ]),
+      backgroundColor: Colors.white,
+      appBar:AppBar(
+        backgroundColor: colors.primary,
+        elevation: 2,
+        title: Text(
+          "${widget.title}",
+          style: TextStyle(
+            fontSize: 20,
+            color: Colors.white,
           ),
-        ));
-  }
-
-  Future<void> getFaqs() async {
-    _isNetworkAvail = await isNetworkAvailable();
-    if (_isNetworkAvail) {
-      try {
-        Response response = await post(getFaqsApi, headers: headers)
-            .timeout(Duration(seconds: timeOut));
-        if (response.statusCode == 200) {
-          var getdata = json.decode(response.body);
-          bool error = getdata["error"];
-          String? msg = getdata["message"];
-          if (!error) {
-            var data = getdata["data"];
-            faqsList = (data as List).map((data) => new FaqsModel.fromJson(data)).toList();
-          } else {
-            setSnackbar(msg!);
-          }
-        }
-         if (mounted) setState(() {
-          _isLoading = false;
-        });
-      } on TimeoutException catch (_) {
-        setSnackbar( getTranslated(context,'somethingMSg')!);
-      }
-    } else {
-       if (mounted) setState(() {
-        _isLoading = false;
-        _isNetworkAvail = false;
-      });
-    }
-  }
-
-  setSnackbar(String msg) {
-  ScaffoldMessenger.of(context).showSnackBar(new SnackBar(
-      content: new Text(
-        msg,
-        textAlign: TextAlign.center,
-        style: TextStyle(color: Theme.of(context).colorScheme.black),
+        ),
+        centerTitle: true,
+        leading:  Padding(
+          padding: const EdgeInsets.all(12),
+          child: RawMaterialButton(
+            shape: CircleBorder(),
+            padding: const EdgeInsets.all(0),
+            fillColor: Colors.white,
+            splashColor: Colors.grey[400],
+            child: Icon(
+              Icons.arrow_back,
+              size: 20,
+              color: Colors.black,
+            ),
+            onPressed: () {
+              Navigator.pop(context);
+            },
+          ),
+        ),
       ),
-      backgroundColor: Theme.of(context).colorScheme.white,
-      elevation: 1.0,
-    ));
+      body: SingleChildScrollView(
+        child: FaqModel == null || FaqModel == "" ? Center(child: CircularProgressIndicator(color: colors.primary,),):
+        FutureBuilder(
+            future: getFaq(),
+            builder: (BuildContext context, AsyncSnapshot snapshot) {
+              FaqModel faqsList = snapshot.data;
+              if (snapshot.hasData) {
+                return ListView.builder(
+                  controller: controller,
+                  itemCount: faqsList.data?.length ?? 0,
+                  shrinkWrap: true,
+                  physics: BouncingScrollPhysics(),
+                  itemBuilder: (context, index) {
+                    return Card(
+                        elevation: 1,
+                        child: InkWell(
+                          borderRadius: BorderRadius.circular(4),
+                          onTap: () {
+                            if (mounted) setState(() {
+                              selectedIndex = index;
+                              flag = !flag;
+                            });
+                          },
+                          child: Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: <Widget>[
+                                  Padding(
+                                      padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                                      child: Text(
+                                        faqsList.data?[index].question ?? "",
+                                        style: const TextStyle(
+                                            color: Colors.black
+                                        ),
+                                      ),
+                                    ),
+                                    selectedIndex != index || flag
+                                      ? Row(
+                                      mainAxisAlignment: MainAxisAlignment.start,
+                                      crossAxisAlignment: CrossAxisAlignment.center,
+                                      children: [
+                                      Expanded(
+                                          child: Padding(
+                                              padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                                              child: Text(
+                                                faqsList.data?[index].question ?? "",
+                                                style: const TextStyle(color: Colors.black),
+                                                maxLines: 1,
+                                                overflow: TextOverflow.ellipsis,
+                                              ),
+                                          ),
+                                      ),
+                                      // Icon(Icons.keyboard_arrow_down)
+                                    ],
+                                    ): Row(
+                                      mainAxisAlignment: MainAxisAlignment.start,
+                                      crossAxisAlignment: CrossAxisAlignment.center,
+                                      children: [
+                                        Expanded(
+                                            child: Padding(padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                                                child: Text(
+                                                  faqsList.data?[index].answer ?? "",
+                                                  style: TextStyle(
+                                                      color: Colors.black
+                                                  ),
+                                                ),
+                                            ),
+                                        ),
+                                        //Icon(Icons.keyboard_arrow_up)
+                                      ]),
+                                ]),
+                          ),
+                        ));
+                  },
+                );
+              } else if (snapshot.hasError) {
+                return Icon(Icons.error_outline);
+              } else {
+                return Center(child: CircularProgressIndicator());
+              }
+            }),
+      ),
+    );
+  }
+
+
+  Future getFaq() async {
+    var request = http.Request('GET', Uri.parse(getFaqs.toString()));
+    http.StreamedResponse response = await request.send();
+    print(request);
+    print(response.statusCode);
+    if (response.statusCode == 200) {
+      final str = await response.stream.bytesToString();
+      print(str);
+      return FaqModel.fromJson(json.decode(str));
+    }
+    else {
+      return null;
+    }
   }
 }

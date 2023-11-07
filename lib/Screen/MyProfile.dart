@@ -40,6 +40,7 @@ import 'MyOrder.dart';
 import 'My_Wallet.dart';
 import 'Performance/Performace.dart';
 import 'Privacy_Policy.dart';
+import 'TermCondition.dart';
 
 class MyProfile extends StatefulWidget {
   @override
@@ -53,7 +54,7 @@ class StateProfile extends State<MyProfile> with TickerProviderStateMixin {
   var isDarkTheme;
   bool isDark = false;
   late ThemeNotifier themeNotifier;
-  List<String> langCode = ["en","hi", "zh", "es",  "ar", "ru", "ja", "de"];
+  List<String> langCode = ["en", "hi", "bn", "zh", "es", "ar", "ja", "de"];
   List<String?> themeList = [];
   List<String?> languageList = [];
   final GlobalKey<FormState> _formkey = GlobalKey<FormState>();
@@ -140,9 +141,7 @@ class StateProfile extends State<MyProfile> with TickerProviderStateMixin {
           }
         }
       } else {
-
       }
-
       context.read<HomeProvider>().setCatLoading(false);
     }, onError: (error) {
       // setSnackbar(error.toString(), context);
@@ -163,11 +162,12 @@ class StateProfile extends State<MyProfile> with TickerProviderStateMixin {
       languageList = [
         getTranslated(context, 'ENGLISH_LAN'),
         getTranslated(context, 'HINDI_LAN'),
+        // getTranslated(context, 'ENGLISH_LAN'),
+        // getTranslated(context, 'BENGALI'),
+        // getTranslated(context, 'HINDI_LAN'),
         // getTranslated(context, 'CHINESE_LAN'),
         // getTranslated(context, 'SPANISH_LAN'),
-        //
         // getTranslated(context, 'ARABIC_LAN'),
-        // getTranslated(context, 'RUSSIAN_LAN'),
         // getTranslated(context, 'JAPANISE_LAN'),
         // getTranslated(context, 'GERMAN_LAN')
       ];
@@ -175,9 +175,8 @@ class StateProfile extends State<MyProfile> with TickerProviderStateMixin {
       themeList = [
         getTranslated(context, 'SYSTEM_DEFAULT'),
         getTranslated(context, 'LIGHT_THEME'),
-        getTranslated(context, 'DARK_THEME')
+        getTranslated(context, 'DARK_THEME'),
       ];
-
       _getSaved();
     });
 
@@ -387,7 +386,9 @@ class StateProfile extends State<MyProfile> with TickerProviderStateMixin {
                     setState(() {
                       selectLan = index;
                       _changeLan(langCode[index], ctx);
+                      print("hhhhhhhhhhhhhh ----------${langCode[index]}");
                     });
+                  print("indeeeeeeeeeeee");
                   setModalState(() {});
                 },
                 child: Padding(
@@ -399,6 +400,7 @@ class StateProfile extends State<MyProfile> with TickerProviderStateMixin {
                           Container(
                             height: 25.0,
                             decoration: BoxDecoration(
+
                                 shape: BoxShape.circle,
                                 color: selectLan == index
                                     ? colors.grad2Color
@@ -450,8 +452,7 @@ class StateProfile extends State<MyProfile> with TickerProviderStateMixin {
                     ],
                   ),
                 ),
-              )),
-        )
+              )),)
         .values
         .toList();
   }
@@ -542,10 +543,10 @@ class StateProfile extends State<MyProfile> with TickerProviderStateMixin {
         //     : _getDrawerItem(getTranslated(context, 'MANAGE_ADD_LBL')!,
         //         'assets/images/pro_address.svg'),
         //CUR_USERID == "" || CUR_USERID == null ? Container() : _getDivider(),
-        CUR_USERID == "" || CUR_USERID == null
-            ? Container()
-            : _getDrawerItem(getTranslated(context, 'Chat')!,
-            'assets/images/pro_wh.svg'),
+        // CUR_USERID == "" || CUR_USERID == null
+        //     ? Container()
+        //     : _getDrawerItem(getTranslated(context, 'CHAT')!,
+        //     'assets/images/pro_wh.svg'),
         CUR_USERID == "" || CUR_USERID == null
             ? Container()
             : _getDrawerItem(getTranslated(context, 'PERFORMANCE')!,
@@ -567,8 +568,8 @@ class StateProfile extends State<MyProfile> with TickerProviderStateMixin {
         //     : _getDrawerItem("Request Training",
         //     'assets/images/pro_myorder.svg'),
         // _getDivider(),
-        _getDrawerItem(getTranslated(context, 'CHANGE_LANGUAGE_LBL')!,
-            'assets/images/pro_language.svg'),
+        // _getDrawerItem(getTranslated(context, 'CHANGE_LANGUAGE_LBL')!,
+        //     'assets/images/pro_language.svg'),
          // CUR_USERID == "" || CUR_USERID == null ? Container() : _getDivider(),
         CUR_USERID == "" || CUR_USERID == null
             ? Container()
@@ -659,14 +660,14 @@ class StateProfile extends State<MyProfile> with TickerProviderStateMixin {
             //       builder: (context) => MyLeadsAccounts(),
             //     ));
           }
-          else if (title == getTranslated(context, 'Chat')) {
-            Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => Chat(),
-                ),
-            );
-          }
+          // else if (title == getTranslated(context, 'CHAT')) {
+          //   Navigator.push(
+          //       context,
+          //       MaterialPageRoute(
+          //         builder: (context) => Chat(),
+          //       ),
+          //   );
+          // }
           else if (title == getTranslated(context, 'PERFORMANCE')) {
             Navigator.push(
                 context,
@@ -728,7 +729,7 @@ class StateProfile extends State<MyProfile> with TickerProviderStateMixin {
             Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => PrivacyPolicy(
+                  builder: (context) => TermCondition(
                     title: getTranslated(context, 'TERM'),
                   ),
                 ));
@@ -759,11 +760,9 @@ class StateProfile extends State<MyProfile> with TickerProviderStateMixin {
             Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => Faqs(
+                  builder: (context) => FaqScreen(
                     title: getTranslated(context, 'FAQS'),
-                  ),
-                ));
-
+                  )));
           }
           else if (title == getTranslated(context, 'CHANGE_THEME_LBL')) {
             openChangeThemeBottomSheet();
@@ -962,7 +961,8 @@ class StateProfile extends State<MyProfile> with TickerProviderStateMixin {
   Widget build(BuildContext context) {
     languageList = [
       getTranslated(context, 'ENGLISH_LAN'),
-      getTranslated(context, 'HINDI_LAN'),
+       getTranslated(context, 'HINDI_LAN'),
+      // getTranslated(context, 'BENGALI'),
       // getTranslated(context, 'CHINESE_LAN'),
       // getTranslated(context, 'SPANISH_LAN'),
       //
@@ -974,7 +974,7 @@ class StateProfile extends State<MyProfile> with TickerProviderStateMixin {
     themeList = [
       getTranslated(context, 'SYSTEM_DEFAULT'),
       getTranslated(context, 'LIGHT_THEME'),
-      getTranslated(context, 'DARK_THEME')
+      getTranslated(context, 'DARK_THEME'),
     ];
     themeNotifier = Provider.of<ThemeNotifier>(context);
 
@@ -1174,11 +1174,9 @@ class StateProfile extends State<MyProfile> with TickerProviderStateMixin {
          return StatefulBuilder(
           builder: (BuildContext context, StateSetter setState) {
            return
-
              Wrap(
                alignment: WrapAlignment.center,
                children: [
-
                  Padding(
                      padding: EdgeInsets.all(15),
                      child: Text(
@@ -1194,20 +1192,11 @@ class StateProfile extends State<MyProfile> with TickerProviderStateMixin {
                      child: Container(
                        padding: EdgeInsets.all(8),
                        height: 50,
-                       width: MediaQuery
-                           .of(context)
-                           .size
-                           .width,
+                       width: MediaQuery.of(context).size.width,
                        decoration: BoxDecoration(
-                           color: Theme
-                               .of(context)
-                               .colorScheme
-                               .white,
+                           color: Theme.of(context).colorScheme.white,
                            borderRadius: BorderRadius.circular(12),
-                           border: Border.all(color: Theme
-                               .of(context)
-                               .colorScheme
-                               .fontColor)
+                           border: Border.all(color: Theme.of(context).colorScheme.fontColor)
                        ),
                        child: DropdownButtonHideUnderline(
                          child: DropdownButton(
@@ -1223,18 +1212,14 @@ class StateProfile extends State<MyProfile> with TickerProviderStateMixin {
                            items: catList.map((item) {
                              return DropdownMenuItem(
                                child: Text(
-                                 item.name!, style: TextStyle(color: Theme
-                                   .of(context)
-                                   .colorScheme
-                                   .fontColor),),
+                                 item.name!, style: TextStyle(color: Theme.of(context).colorScheme.fontColor),),
                                value: item.id,
                              );
                            }).toList(),
                          ),
                        ),
-                     )
-                 )
-                     : SizedBox.shrink(),
+                     ),
+                  ): SizedBox.shrink(),
                  Padding(
                    padding: const EdgeInsets.all(20),
                    child: Container(
@@ -1496,8 +1481,6 @@ class StateProfile extends State<MyProfile> with TickerProviderStateMixin {
       );
 
 
-
-
   Widget saveButton(String title, VoidCallback? onBtnSelected) {
     return Row(
       children: [
@@ -1617,8 +1600,7 @@ class StateProfile extends State<MyProfile> with TickerProviderStateMixin {
                       bottomSheetHandle(),
                       bottomsheetLabel("CHOOSE_LANGUAGE_LBL"),
                       StatefulBuilder(
-                        builder:
-                            (BuildContext context, StateSetter setModalState) {
+                        builder: (BuildContext context, StateSetter setModalState) {
                           return SingleChildScrollView(
                             child: Column(
                                 mainAxisAlignment: MainAxisAlignment.start,

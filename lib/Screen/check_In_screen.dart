@@ -7,12 +7,15 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:image_cropper/image_cropper.dart';
+import 'package:intl/intl.dart';
 // import 'package:image_picker_gallery_camera/image_picker_gallery_camera.dart';
 import 'package:omega_employee_management/Helper/Color.dart';
 import 'package:omega_employee_management/Helper/Session.dart';
 import 'package:omega_employee_management/Screen/Dashboard.dart';
 import '../../Helper/String.dart';
 import 'package:http/http.dart'as http;
+
+import '../Model/PunchInModel.dart';
 
 
 class CheckInScreen extends StatefulWidget {
@@ -66,14 +69,12 @@ class _CheckInScreenState extends State<CheckInScreen> {
         Navigator.pop(context, true);
       }else{
         setState(() {
-          isLoading=false;
+          isLoading = false;
         });
         Fluttertoast.showToast(msg: result['data']['msg']);
       }
       // var finalResponse = GetUserExpensesModel.fromJson(result);
-
       // final finalResponse = CheckInModel.fromJson(json.decode(Response));
-
     }
     else {
       print(response.reasonPhrase);
@@ -237,20 +238,21 @@ class _CheckInScreenState extends State<CheckInScreen> {
                     setState((){
                       imagePathList.remove(imagePathList[index]);
                     });
-
                   },
                   child: Icon(
                     Icons.remove_circle,
                     size: 30,
-                    color: Colors.red.withOpacity(0.7),),
+                    color: Colors.red.withOpacity(0.7)),
                 ),
-              )
+              ),
             ],
           );
         },
       ),
     );
   }
+
+
   void pickImageDialog(BuildContext context,int i) async{
     return await showDialog<void>(
       context: context,
@@ -299,8 +301,8 @@ class _CheckInScreenState extends State<CheckInScreen> {
         );
       },
     );
-
   }
+
   // Future getImage(ImgSource source, BuildContext context, int i) async {
   //
   //   var image = await ImagePickerGC.pickImage(
@@ -315,6 +317,7 @@ class _CheckInScreenState extends State<CheckInScreen> {
   //   getCropImage(context, i, image);
   //   // back();
   // }
+
   void getCropImage(BuildContext context, int i, var image) async {
     CroppedFile? croppedFile = await ImageCropper.platform.cropImage(
       sourcePath: image.path,
@@ -342,10 +345,169 @@ class _CheckInScreenState extends State<CheckInScreen> {
   ///
 
   @override
-void initState() {
+  void initState() {
     // TODO: implement initState
-    getCurrentLoc();
+    // getCurrentLoc();
     super.initState();
+    convertDateTimeDispla();
+   }
+
+  String? monthly;
+  var monthlyitem = [
+    'On Leave',
+    'Weekly Off',
+    'Holiday',
+    'Compensatory Holiday',
+    'OnDuty'
+  ];
+
+  String? shift;
+  var shiftItem = [
+    'Day',
+    'Night',
+    'General'
+  ];
+
+  String? taskStatus;
+  var taskItem = [
+    'Done',
+    'Not-Done'
+  ];
+
+  var dateFormate;
+  String? formattedDate;
+  String? timeData;
+
+  convertDateTimeDispla() {
+    var now = new DateTime.now();
+    var formatter = new DateFormat('yyyy-MM-dd');
+    formattedDate = formatter.format(now);
+    print("datedetet${formattedDate}"); // 2016-01-25
+    timeData = DateFormat("hh:mm:ss a").format(DateTime.now());
+    print("timeeeeeeeeee${timeData}");
+  }
+
+  bool isCheckedIn = true;
+  PunchInModel? punchInModel;
+  punchIn(Status) async {
+    var headers = {
+      'Cookie': 'ci_session=c7229fd981f7b63597f01b3b6b126ef924a184d8'
+    };
+    var request = http.MultipartRequest('POST', Uri.parse(punchsIn.toString()));
+    request.fields.addAll({
+      'user_id': '${CUR_USERID}',
+      'check_in': '${timeData}',
+      'date': '${formattedDate}',
+      'status': "${Status}",
+      'shift': "${shift.toString()}"
+    });
+    print("punch in parameter ${request.fields}");
+    request.headers.addAll(headers);
+    http.StreamedResponse response = await request.send();
+    if (response.statusCode == 200) {
+      String str = await response.stream.bytesToString();
+      var result = json.decode(str);
+      // bool status = result['data'];
+      var finalResponse = PunchInModel.fromJson(result);
+      print("punch in paratetet ${finalResponse}");
+      Fluttertoast.showToast(msg: "${finalResponse.message}");
+      setState(() {
+        // isCheckedIn = status;
+        punchInModel = finalResponse;
+      });
+      Navigator.push(context, MaterialPageRoute(builder: (context) => Dashboard(status: punchInModel?.data?.status.toString())));
+    }
+    else {
+      print(response.reasonPhrase);
+    }
+  }
+
+  monthlyDialog() {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          content: SingleChildScrollView(
+            child: ListBody(
+              children: <Widget>[
+                Card(
+                  elevation: 3,
+                  child: DropdownButtonFormField<String>(
+                    value: monthly,
+                    onChanged: (String? newValue) {
+                      setState(() {
+                        monthly = newValue!;
+                        print("printttttt statusss ${monthly}");
+                      });
+                    },
+                    items: monthlyitem.map((String avaliableitem) {
+                      return DropdownMenuItem(
+                        value: avaliableitem,
+                        child: Text(avaliableitem.toString()),
+                      );
+                    }).toList(),
+                    decoration: InputDecoration(
+                      border: InputBorder.none,
+                      hintText: getTranslated(context, 'DUTY_STATUS')!,
+                      filled: true,
+                    ),
+                  ),
+                ),
+                SizedBox(height: 10),
+                Card(
+                  elevation: 3,
+                  child: DropdownButtonFormField<String>(
+                    value: shift,
+                    onChanged: (String? newValue) {
+                      setState(() {
+                        shift = newValue!;
+                        print("printttttt statusss ${shift}");
+                      });
+                    },
+                    items: shiftItem.map((String avaliableitem) {
+                      return DropdownMenuItem(
+                        value: avaliableitem,
+                        child: Text(avaliableitem.toString()),
+                      );
+                    }).toList(),
+                    decoration: InputDecoration(
+                      border: InputBorder.none,
+                      hintText: getTranslated(context, 'SHIFT')!,
+                      filled: true,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: Text(getTranslated(context, 'CANCEL')!,
+                  style: Theme.of(this.context).textTheme.subtitle2!.copyWith(
+                      color: Theme.of(context).colorScheme.lightBlack,
+                      fontWeight: FontWeight.bold)),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              child:  Text(getTranslated(context, 'CONFIRM')!,
+                  style: Theme.of(this.context).textTheme.subtitle2!.copyWith(
+                      color: Theme.of(context).colorScheme.lightBlack,
+                      fontWeight: FontWeight.bold)),
+              onPressed: () {
+                setState(() {});
+                punchIn(monthly.toString());
+                // getDoctors();
+                // Navigator.of(context).pop();
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
   }
 
   @override
@@ -363,82 +525,70 @@ void initState() {
         height: MediaQuery.of(context).size.height,
         width: MediaQuery.of(context).size.width,
         child: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Container(
-                height: 250,
-                width: 250,
-                child: ClipRRect(
-                    borderRadius: BorderRadius.circular(10),
-                    child: Image.asset(
-                      "assets/images/checkin.png",
-                      fit: BoxFit.cover,
-                    )),
-              ),
-              SizedBox(
-                height: 20,
-              ),
-              Text(
-                "Checking in.....",
-                style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: colors.whiteTemp),
-                textAlign: TextAlign.center,
-              ),
-              SizedBox(
-                height: 10,
-              ),
-              currentAddress.text == "" || currentAddress.text == null
-                  ? Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 15),
-                      child: Text(
-                        "Locating...",
-                        style: TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 20),
+          child: Padding(
+            padding: const EdgeInsets.only(top: 50),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Container(
+                  height: 250,
+                  width: 250,
+                  child: ClipRRect(
+                      borderRadius: BorderRadius.circular(10),
+                      child: Image.asset(
+                        "assets/images/checkin.png",
+                        fit: BoxFit.cover,
                       ),
+                  ),
+                ),
+                SizedBox(
+                  height: 80,
+                ),
+                ElevatedButton(
+                    onPressed: () async {
+                      // punchIn();
+                      setState(() {
+                        // isCheckedIn = true;
+                      });
+                      monthlyDialog();
+                    }, child: Text(getTranslated(context, 'PUNCHIN')!,
+                      ),
+                    style: ElevatedButton.styleFrom(
+                        elevation: 0,
+                        shape: StadiumBorder(),
+                        fixedSize: Size(170, 40),
+                        backgroundColor: colors.primary
                     )
-                  : Text(
-                      "${currentAddress.text}",
-                      style: TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 20),
-                    ),
-              SizedBox(height: 15,),
-              uploadMultiImage(),
-               SizedBox(height: 50,),
-
-              Container(
-                  height: 45,
-                  width: 220,
-                  child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                          elevation: 0,
-                          shape: StadiumBorder(),
-                          fixedSize: Size(350, 40),
-                          backgroundColor: colors.primary.withOpacity(0.8)
-                      ),
-                      onPressed: () {
-                        if(latitude == "" || latitude == 0 || latitude ==null) {
-                          setSnackbar("Please wait fetching your current location...", context);
-
-                        }else{
-                          setState(() {
-                            isLoading = true;
-                          });
-                          checkInNow();
-                        }
-                  },
-                      child:isLoading? Center(child: CircularProgressIndicator(
-                        color: Colors.white,
-                      ))
-                  : Text('CHECK IN NOW'))
-              )
-                  // : SizedBox.shrink()
-
-            ],
+                ),
+                //  SizedBox(height: 50),
+                //  Container(
+                //     height: 45,
+                //     width: 220,
+                //     child: ElevatedButton(
+                //         style: ElevatedButton.styleFrom(
+                //             elevation: 0,
+                //             shape: StadiumBorder(),
+                //             fixedSize: Size(350, 40),
+                //             backgroundColor: colors.primary.withOpacity(0.8)
+                //         ),
+                //         onPressed: () {
+                //           if(latitude == "" || latitude == 0 || latitude == null) {
+                //             setSnackbar("Please wait fetching your current location...", context);
+                //           }else{
+                //             setState(() {
+                //               isLoading = true;
+                //             });
+                //             checkInNow();
+                //           }
+                //     },
+                //         child:isLoading? Center(child: CircularProgressIndicator(
+                //           color: Colors.white,
+                //         ))
+                //     : Text('PUNCH IN NOW'))
+                // ) // : SizedBox.shrink()
+              ],
+            ),
           ),
         ),
       ),

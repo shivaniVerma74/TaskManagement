@@ -19,13 +19,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:http/http.dart';
+import 'Chat.dart';
 import 'HomePage.dart';
 import 'NotificationLIst.dart';
 
 
 class Dashboard extends StatefulWidget {
+  String? status;
   final int? selectedIndex;
-  const Dashboard({Key? key, this.selectedIndex}) : super(key: key);
+   Dashboard({Key? key, this.selectedIndex, this.status}) : super(key: key);
 
   @override
   _HomePageState createState() => _HomePageState();
@@ -192,8 +194,9 @@ class _HomePageState extends State<Dashboard> with TickerProviderStateMixin {
         body: TabBarView(
           controller: _tabController,
           children: [
-            HomePage(),
-            UserExpensesScreen(),
+            HomePage(status: widget.status.toString()),
+            Chat(),
+            // UserExpensesScreen(),
             // AllCategory(),
             // Sale(),
             // Cart(
@@ -213,11 +216,10 @@ class _HomePageState extends State<Dashboard> with TickerProviderStateMixin {
     // if (_selBottom == 1)
     //   title = getTranslated(context, 'CATEGORY');
      if (_selBottom == 1)
-      title = getTranslated(context, 'MY_LEADS');
+      title = getTranslated(context, 'CHAT');
     // else if (_selBottom == 3)
     //   title = getTranslated(context, 'MYBAG');
     else if (_selBottom == 2) title = getTranslated(context, 'PROFILE');
-
     return AppBar(
       centerTitle: _selBottom == 0 ? true : false,
       title: _selBottom == 0
@@ -236,26 +238,25 @@ class _HomePageState extends State<Dashboard> with TickerProviderStateMixin {
                   color: colors.primary, fontWeight: FontWeight.normal,
               ),
             ),
-        leading: _selBottom == 0
-          ? IconButton(
-          icon: SvgPicture.asset(
-          imagePath + "desel_notification.svg",
-          color: colors.primary,
-        ),
-        onPressed: () {
-          CUR_USERID != null
-              ? Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => NotificationList(),
-              ))
-              : Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => LoginPage(),
-              ));
-        },
-      ): null,
+      //   leading: _selBottom == 0
+      //     ? IconButton(
+      //     icon: SvgPicture.asset(
+      //     imagePath + "desel_notification.svg",
+      //     color: colors.primary,
+      //   ),
+      //   onPressed: () {
+      //     CUR_USERID != null
+      //         ? Navigator.push(
+      //         context, MaterialPageRoute(
+      //           builder: (context) => NotificationList(),
+      //         ))
+      //         : Navigator.push(
+      //         context,
+      //         MaterialPageRoute(
+      //           builder: (context) => LoginPage(),
+      //         ));
+      //   },
+      // ): null,
       // iconTheme: new IconThemeData(color: colors.primary),
       // // centerTitle:_curSelected == 0? false:true,
       // actions: <Widget>[
@@ -364,7 +365,7 @@ class _HomePageState extends State<Dashboard> with TickerProviderStateMixin {
                 )
                     : Icon(Icons.assignment_outlined),
                 text:
-                _selBottom == 1 ? getTranslated(context, 'MY_LEADS') : null,
+                _selBottom == 1 ? getTranslated(context, 'CHAT') : null,
               ),
               // Tab(
               //   icon: _selBottom == 1

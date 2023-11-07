@@ -4,6 +4,7 @@ import 'dart:io';
 import 'dart:math';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:marquee/marquee.dart';
 import 'package:omega_employee_management/Model/category_model.dart';
@@ -39,9 +40,13 @@ import 'package:package_info/package_info.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shimmer/shimmer.dart';
+import 'package:timelines/timelines.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:version/version.dart';
+import '../Model/AddCommentModel.dart';
 import '../Model/AllTaskModel.dart';
+import '../Model/FileModel.dart';
+import '../Model/GeneralMessageModel.dart';
 import '../Model/GetMarqueeModel.dart';
 import '../Model/PunchInModel.dart';
 import '../Model/TaskCountModel.dart';
@@ -52,7 +57,8 @@ import 'Product_Detail.dart';
 import 'package:http/http.dart' as http;
 import 'SectionList.dart';
 class HomePage extends StatefulWidget {
-  const HomePage({Key? key}) : super(key: key);
+  String? status;
+   HomePage({Key? key, this.status}) : super(key: key);
 
   @override
   _HomePageState createState() => _HomePageState();
@@ -103,9 +109,9 @@ class _HomePageState extends State<HomePage>
     };
     var request = http.MultipartRequest('POST', Uri.parse(taskList.toString()));
     request.fields.addAll({
-    "user_id": "${CUR_USERID}",
-    // status == "0" || status == "1" ? "" : "current_date": "${formattedDate}",
-    "filter_by":"${status}"
+      "user_id": "${CUR_USERID}",
+      // status == "0" || status == "1" ? "" : "current_date": "${formattedDate}",
+      "filter_by":"${status}"
     });
 
     print("this is refer request ${request.fields.toString()}");
@@ -115,6 +121,9 @@ class _HomePageState extends State<HomePage>
       String str = await response.stream.bytesToString();
       var result = json.decode(str);
       var finalResponse = TaskListModel.fromJson(result);
+      for(int i=0; i < taskdata.length; i++){
+        SelectedTask.add(taskStatus);
+      };
       setState(() {
         taskdata = finalResponse.data!;
       });
@@ -143,9 +152,9 @@ class _HomePageState extends State<HomePage>
       String str = await response.stream.bytesToString();
       var result = json.decode(str);
       bool status = result['data'];
-     setState(() {
-       isCheckedIn = status;
-     });
+      setState(() {
+        isCheckedIn = status;
+      });
     }
     else {
       print(response.reasonPhrase);
@@ -155,6 +164,7 @@ class _HomePageState extends State<HomePage>
   @override
   void initState() {
     super.initState();
+    generalMessage();
     convertDateTimeDispla();
     showText();
     taskCount();
@@ -175,9 +185,6 @@ class _HomePageState extends State<HomePage>
     );
     WidgetsBinding.instance.addPostFrameCallback((_) => _animateSlider());
   }
-
-
-
 
   TaskCountModel? taskCountModel;
   taskCount() async {
@@ -215,7 +222,8 @@ class _HomePageState extends State<HomePage>
       'user_id': '${CUR_USERID}',
       'check_in': '${timeData}',
       'date': '${formattedDate}',
-      'status': "${Status}"
+      'status': "${Status}",
+      'shift': "${shift.toString()}"
     });
     print("punch in parameter ${request.fields}");
     request.headers.addAll(headers);
@@ -235,7 +243,6 @@ class _HomePageState extends State<HomePage>
       print(response.reasonPhrase);
     }
   }
-
 
   punchOut() async {
     var headers = {
@@ -264,6 +271,118 @@ class _HomePageState extends State<HomePage>
     }
   }
 
+  TextEditingController commentCtr = TextEditingController();
+  TextEditingController hoursCtr = TextEditingController();
+
+
+  AddCommentModel? commentModel;
+  addComments(String id) async {
+    var headers = {
+      'Cookie': 'ci_session=25ee3f7e594da0604bae2735d787cc67e2db2b6a'
+    };
+    var request = http.MultipartRequest(
+        'POST', Uri.parse(addComment.toString()));
+    request.fields.addAll({
+      'user_id': '${CUR_USERID}',
+      'task_id': id.toString(),
+      'comment': '${commentCtr.text}'
+    });
+    print("add comment parameter ${request.fields}");
+    request.headers.addAll(headers);
+    http.StreamedResponse response = await request.send();
+    if (response.statusCode == 200) {
+      String str = await response.stream.bytesToString();
+      var result = json.decode(str);
+      var finalResponse = AddCommentModel.fromJson(result);
+      setState(() {
+        commentModel = finalResponse;
+      });
+      // Navigator.push(context, MaterialPageRoute(builder: (context) => Dashboard()));
+      print("this is add comment data ${commentModel}");
+    }
+    else {
+      print(response.reasonPhrase);
+    }
+  }
+
+
+  FileModel? fileModel;
+  fileUpload(String id) async {
+    var headers = {
+      'Cookie': 'ci_session=d4000545880f5c86431690491339c9cbcee8567b'
+    };
+    var request = http.MultipartRequest('POST', Uri.parse(addFile.toString()));
+    request.fields.addAll({
+      'user_id': '${CUR_USERID}',
+      'task_id': id.toString()
+    });
+    request.files.add(await http.MultipartFile.fromPath('image', _imageFile!.path ?? ""));
+    print('file uploaddd parameter ${request.fields}');
+    print('uploaddd filessss ${request.files}');
+    request.headers.addAll(headers);
+    http.StreamedResponse response = await request.send();
+    if (response.statusCode == 200) {
+      String str = await response.stream.bytesToString();
+      var result = json.decode(str);
+      // var finalResponse = FileModel.fromJson(result);
+      // setState(() {
+      //   fileModel = finalResponse;
+      // });
+      // Navigator.push(context, MaterialPageRoute(builder: (context) => Dashboard()));
+    }
+    else {
+      print(response.reasonPhrase);
+    }
+  }
+
+  GeneralMessageModel? generalMsg;
+  generalMessage() async {
+    var headers = {
+      'Cookie': 'ci_session=ffe97a853265a99c63e03ae0d289d11faddc8392'
+    };
+    var request = http.MultipartRequest('POST', Uri.parse(getGeneralMessage.toString()));
+    request.fields.addAll({
+      'user_id': '${CUR_USERID}'
+    });
+
+    request.headers.addAll(headers);
+    http.StreamedResponse response = await request.send();
+    if (response.statusCode == 200) {
+      String str = await response.stream.bytesToString();
+      var result = json.decode(str);
+      var finalResponse = GeneralMessageModel.fromJson(result);
+      setState(() {
+        generalMsg = finalResponse;
+      });
+    }
+    else {
+      print(response.reasonPhrase);
+    }
+  }
+
+
+  readMsg(String id) async {
+    var headers = {
+      'Cookie': 'ci_session=462794420e79f2a4c8e637ae1181e1f1e194a4e3'
+    };
+    var request = http.MultipartRequest('POST', Uri.parse(readMessage.toString()));
+    request.fields.addAll({
+      'message_id': id.toString(),
+      'status': '1'
+    });
+
+    print("read msggg parametere ${request.fields}");
+    request.headers.addAll(headers);
+    http.StreamedResponse response = await request.send();
+    if (response.statusCode == 200) {
+      print(await response.stream.bytesToString());
+      generalMessage();
+    }
+    else {
+      print(response.reasonPhrase);
+    }
+  }
+
   String? monthly;
   var monthlyitem = [
     'On Leave',
@@ -271,6 +390,21 @@ class _HomePageState extends State<HomePage>
     'Holiday',
     'Compensatory Holiday',
     'OnDuty'
+  ];
+
+  String? shift;
+  var shiftItem = [
+    'Day',
+    'Night',
+    'General'
+  ];
+
+
+  List<String?> SelectedTask =[];
+  String? taskStatus;
+  var taskItem = [
+    'Done',
+    'Not-Done'
   ];
 
   monthlyDialog() {
@@ -298,9 +432,33 @@ class _HomePageState extends State<HomePage>
                         child: Text(avaliableitem.toString()),
                       );
                     }).toList(),
-                    decoration:  InputDecoration(
+                    decoration: InputDecoration(
                       border: InputBorder.none,
-                      hintText: getTranslated(context, 'STATUS')!,
+                      hintText: getTranslated(context, 'DUTY_STATUS')!,
+                      filled: true,
+                    ),
+                  ),
+                ),
+                SizedBox(height: 10),
+                Card(
+                  elevation: 3,
+                  child: DropdownButtonFormField<String>(
+                    value: shift,
+                    onChanged: (String? newValue) {
+                      setState(() {
+                        shift = newValue!;
+                        print("printttttt statusss ${shift}");
+                      });
+                    },
+                    items: shiftItem.map((String avaliableitem) {
+                      return DropdownMenuItem(
+                        value: avaliableitem,
+                        child: Text(avaliableitem.toString()),
+                      );
+                    }).toList(),
+                    decoration: InputDecoration(
+                      border: InputBorder.none,
+                      hintText: getTranslated(context, 'SHIFT')!,
                       filled: true,
                     ),
                   ),
@@ -311,19 +469,19 @@ class _HomePageState extends State<HomePage>
           actions: <Widget>[
             TextButton(
               child: Text(getTranslated(context, 'CANCEL')!,
-                style: Theme.of(this.context).textTheme.subtitle2!.copyWith(
-                    color: Theme.of(context).colorScheme.lightBlack,
-                    fontWeight: FontWeight.bold)),
-                onPressed: () {
+                  style: Theme.of(this.context).textTheme.subtitle2!.copyWith(
+                      color: Theme.of(context).colorScheme.lightBlack,
+                      fontWeight: FontWeight.bold)),
+              onPressed: () {
                 Navigator.of(context).pop();
               },
             ),
             TextButton(
-               child:  Text(getTranslated(context, 'CONFIRM')!,
-                style: Theme.of(this.context).textTheme.subtitle2!.copyWith(
-                color: Theme.of(context).colorScheme.lightBlack,
-                fontWeight: FontWeight.bold)),
-                onPressed: () {
+              child:  Text(getTranslated(context, 'CONFIRM')!,
+                  style: Theme.of(this.context).textTheme.subtitle2!.copyWith(
+                      color: Theme.of(context).colorScheme.lightBlack,
+                      fontWeight: FontWeight.bold)),
+              onPressed: () {
                 setState(() {});
                 punchIn(monthly.toString());
                 // getDoctors();
@@ -336,6 +494,242 @@ class _HomePageState extends State<HomePage>
       },
     );
   }
+
+  _getFromCamera() async {
+    PickedFile? pickedFile = await ImagePicker().getImage(
+      source: ImageSource.camera,
+    );
+    if (pickedFile != null) {
+      setState(() {
+        _imageFile = File(pickedFile.path);
+        // imagePathList.add(_imageFile?.path ?? "");
+        isImages = true ;
+      });
+      //Navigator.pop(context);
+    }
+  }
+
+  final picker = ImagePicker();
+  File? _imageFile;
+  List<String> imagePathList = [];
+  bool isImages = false;
+
+
+  Widget buildGridView() {
+    return Container(
+      height: 200,
+      child: Card(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(15))),
+        child: Container(
+          width: MediaQuery.of(context).size.width/2.3,
+          height: MediaQuery.of(context).size.height/3,
+          child: _imageFile! == "" ? Text("--"):
+          ClipRRect(
+            borderRadius: BorderRadius.all(Radius.circular(15)),
+            child: Image.file(_imageFile!,
+                fit: BoxFit.cover),
+          ),
+        ),
+      ),
+    );
+  }
+
+
+  void msgDialog(BuildContext context, String id) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          // title: Text(title),
+          // content: Text(message),
+          actions: <Widget>[
+            Column(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.only(top: 10),
+                  child: Container(
+                      height: 60,
+                      width: MediaQuery.of(context).size.width/1.2,
+                      decoration: BoxDecoration(borderRadius: BorderRadius.circular(10), color: Colors.white),
+                      child: Text("${generalMsg?.data?[0].message}")
+                  ),
+                ),
+                SizedBox(height: 40),
+                InkWell(
+                  onTap: () {
+                    readMsg(id);
+                    Navigator.pop(context);
+                  },
+                  child: Container(
+                    height: 40,
+                    width: 80,
+                    decoration: BoxDecoration(borderRadius: BorderRadius.circular(5), color: colors.primary),
+                    child: Center(
+                      child: Text("Seen", style: TextStyle(fontSize: 14, color: Colors.white, fontWeight: FontWeight.bold)),
+                    ),
+                  ),
+                ),
+                SizedBox(height: 10),
+              ],
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+
+  void remarkDialog(BuildContext context, String id) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          // title: Text(title),
+          // content: Text(message),
+          actions: <Widget>[
+            Column(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.only(top: 10),
+                  child: Card(
+                    elevation: 3,
+                    child: Container(
+                      height: 60,
+                      width: MediaQuery.of(context).size.width/1.2,
+                      decoration: BoxDecoration(borderRadius: BorderRadius.circular(10), color: Colors.white),
+                      child: TextFormField(
+                        controller: commentCtr,
+                        keyboardType: TextInputType.text,
+                        decoration: InputDecoration(
+                          contentPadding: EdgeInsets.only(left: 5),
+                          hintText: getTranslated(context, 'ADD_COMMENT_LBL')!,
+                          hintStyle: TextStyle(fontSize: 13),
+                          enabledBorder: OutlineInputBorder(borderSide: BorderSide.none),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                SizedBox(height: 40),
+                InkWell(
+                  onTap: () {
+                    addComments(id);
+                    Navigator.pop(context);
+                  },
+                  child: Container(
+                    height: 40,
+                    width: 80,
+                    decoration: BoxDecoration(borderRadius: BorderRadius.circular(5), color: colors.primary),
+                    child: Center(
+                      child: Text(getTranslated(context, 'SUBMIT_LBL')!, style: TextStyle(fontSize: 14, color: Colors.white, fontWeight: FontWeight.bold)),
+                    ),
+                  ),
+                ),
+                SizedBox(height: 10),
+              ],
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+
+  void fileDialog(BuildContext context, String id) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          // title: Text(title),
+          // content: Text(message),
+          actions: <Widget>[
+            Column(
+              // crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                const SizedBox(
+                  height: 10,
+                ),
+                Padding(
+                  padding: const EdgeInsets.only(right: 55),
+                  child: InkWell(
+                    onTap: () async {
+                      _getFromCamera();
+                    },
+                    child: Container(
+                      height: 40,
+                      width: 145,
+                      decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(5), color: colors.primary),
+                      child: Center(
+                        child: Text(
+                          getTranslated(context, 'UPLOADFILES')!,
+                          style: TextStyle(color: colors.whiteTemp),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(
+                  height:5,
+                ),
+                Visibility(
+                  visible: isImages,
+                  child: Column(
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.only(right: 50, top: 10),
+                        child: buildGridView(),
+                      ),
+                      SizedBox(height: 10),
+                    ],
+                  ),
+                ),
+                // SizedBox(height: 10),
+                // Container(
+                //   height: 200,
+                //   child: Card(
+                //     child: GridView.builder(
+                //         itemCount: fileModel?.data?.length ?? 0,
+                //         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                //             crossAxisCount: 2),
+                //         itemBuilder: (context, index) {
+                //           return Padding(
+                //               padding: EdgeInsets.all(5),
+                //               child: Container(
+                //                   decoration: new BoxDecoration(
+                //                       image: new DecorationImage(
+                //                           image: new NetworkImage("${imageUrl}${fileModel?.data}"),
+                //                           fit: BoxFit.cover))));
+                //         }),
+                //   ),
+                // ),
+                SizedBox(height: 10),
+                Padding(
+                  padding: const EdgeInsets.only(right: 50),
+                  child: InkWell(
+                    onTap: () {
+                      fileUpload(id);
+                      Navigator.pop(context);
+                    },
+                    child: Container(
+                      height: 40,
+                      width: 80,
+                      decoration: BoxDecoration(borderRadius: BorderRadius.circular(5), color: colors.primary),
+                      child: Center(
+                        child: Text(getTranslated(context, 'SUBMIT_LBL')!, style: TextStyle(fontSize: 14, color: Colors.white, fontWeight: FontWeight.bold)),
+                      ),
+                    ),
+                  ),
+                ),
+                SizedBox(height: 10),
+              ],
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   GetMarqueeModel? getMarquees;
   showText() async {
     var headers = {
@@ -357,6 +751,164 @@ class _HomePageState extends State<HomePage>
       print(response.reasonPhrase);
     }
   }
+
+  updatTaskStatus(String id) async {
+    print("update status api");
+    var headers = {
+      'Cookie': 'ci_session=dba5e06204be1e75ba50fc5c9827f31155e5a1f9'
+    };
+    var request = http.MultipartRequest('POST', Uri.parse(updateTaskStatus.toString()));
+    request.fields.addAll({
+      'user_id': '${CUR_USERID}',
+      'task_id': id.toString(),
+      'status': '${taskStatus.toString()}'
+    });
+    print("update task status parameter ${request.fields}");
+    request.headers.addAll(headers);
+    http.StreamedResponse response = await request.send();
+    if (response.statusCode == 200) {
+      var finalResponse = await response.stream.bytesToString();
+      final jsonResponse = json.decode(finalResponse);
+      Fluttertoast.showToast(msg: '${jsonResponse['message']}');
+      // Navigator.push(context, MaterialPageRoute(builder: (context) => Dashboard()));
+    }
+    else {
+      print(response.reasonPhrase);
+    }
+  }
+
+  extension() async {
+    var headers = {
+      'Cookie': 'ci_session=c9e70e3c845328c423493be31f828c9955e44303'
+    };
+    var request = http.MultipartRequest('POST', Uri.parse('https://developmentalphawizz.com/task_management_new/app/api/time_request'));
+    request.fields.addAll({
+      'user_id': "${CUR_USERID}",
+      'time': hoursCtr.text
+    });
+    request.headers.addAll(headers);
+    http.StreamedResponse response = await request.send();
+    if (response.statusCode == 200) {
+      var finalResponse = await response.stream.bytesToString();
+      final jsonResponse = json.decode(finalResponse);
+      Fluttertoast.showToast(msg: '${jsonResponse['message']}');
+    }
+    else {
+      print(response.reasonPhrase);
+    }
+  }
+
+
+  void extensionDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          // title: Text(title),
+          // content: Text(message),
+          actions: <Widget>[
+            Column(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.only(top: 10),
+                  child: Card(
+                    elevation: 3,
+                    child: Container(
+                      height: 60,
+                      width: MediaQuery.of(context).size.width/1.2,
+                      decoration: BoxDecoration(borderRadius: BorderRadius.circular(10), color: Colors.white),
+                      child: TextFormField(
+                        controller: hoursCtr,
+                        keyboardType: TextInputType.text,
+                        decoration: InputDecoration(
+                          contentPadding: EdgeInsets.only(left: 5),
+                          hintText: "Hours",
+                          hintStyle: TextStyle(fontSize: 13),
+                          enabledBorder: OutlineInputBorder(borderSide: BorderSide.none),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                SizedBox(height: 40),
+                InkWell(
+                  onTap: () {
+                    extension();
+                    // addComments(id);
+                    Navigator.pop(context);
+                  },
+                  child: Container(
+                    height: 40,
+                    width: 80,
+                    decoration: BoxDecoration(borderRadius: BorderRadius.circular(5), color: colors.primary),
+                    child: Center(
+                      child: Text(getTranslated(context, 'SUBMIT_LBL')!, style: TextStyle(fontSize: 14, color: Colors.white, fontWeight: FontWeight.bold)),
+                    ),
+                  ),
+                ),
+                SizedBox(height: 10),
+              ],
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  // List<TimelineModel> items = [
+  //   TimelineModel(
+  //     Card(
+  //       child: ListTile(
+  //         title: Text("Step 1"),
+  //         subtitle: Text("Do something in step 1"),
+  //       ),
+  //     ),
+  //     position: TimelineItemPosition.right,
+  //     iconBackground: Colors.green,
+  //     icon: Icon(Icons.check, color: Colors.white),
+  //   ),
+  //   TimelineModel(
+  //     Card(
+  //       child: ListTile(
+  //         title: Text("Step 2"),
+  //         subtitle: Text("Do something in step 2"),
+  //       ),
+  //     ),
+  //     position: TimelineItemPosition.left,
+  //     iconBackground: Colors.blue,
+  //     icon: Icon(Icons.info, color: Colors.white),
+  //   ),
+  //   // Add more items as needed
+  // ];
+
+
+  // Widget buildTimeline() {
+  //   return Timeline(
+  //     children: items,
+  //     position: TimelinePosition.Left,
+  //     lineColor: Colors.black,
+  //     lineGap: 8.0,
+  //     lineWidth: 2.0,
+  //     itemColor: Colors.blue,
+  //     isAlternate: true,
+  //     shrinkWrap: true,
+  //   );
+  // }
+
+  timeLine() {
+    FixedTimeline.tileBuilder(
+      builder: TimelineTileBuilder.connectedFromStyle(
+        connectionDirection: ConnectionDirection.before,
+        connectorStyleBuilder: (context, index) {
+          return (index == 1) ? ConnectorStyle.dashedLine : ConnectorStyle.solidLine;
+        },
+        indicatorStyleBuilder: (context, index) => IndicatorStyle.dot,
+        itemExtent: 40.0,
+        itemCount: 3,
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -372,52 +924,38 @@ class _HomePageState extends State<HomePage>
       //     child: Text("Monthly", style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.white),)
       //   ),
       // ),
-      bottomSheet: Padding(
-        padding:  EdgeInsets.only(left: 10.0, right: 10),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            if (!isCheckedIn)
-            ElevatedButton(
-              onPressed: () async {
-                // punchIn();
-                setState(() {
-                  isCheckedIn = true;
-                });
-                monthlyDialog();
-                // var result = await   Navigator.push(context, MaterialPageRoute(builder: (context)=> CheckInScreen()));
-              // if(result != null){
-              //   setState(() {
-              //     punchIn();
-              //   });
-              // }
-              }, child: Text(getTranslated(context, 'PUNCHIN')!,
-              ),
-              style: ElevatedButton.styleFrom(
-              elevation: 0,
-              shape: StadiumBorder(),
-              fixedSize: Size(150, 40),
-              backgroundColor: colors.blackTemp.withOpacity(0.8))),
-            SizedBox(width: 10),
-            if (isCheckedIn)
-            ElevatedButton(
-              onPressed: () {
-              punchOut();
-              setState(() {
-                isCheckedIn = false;
-              });
-              // Navigator.push(context, MaterialPageRoute(builder: (context)=> CheckOutScreen()));
-            }, child: Text(getTranslated(context, 'PUNCHOUT')!),
-              style: ElevatedButton.styleFrom(
-                  elevation: 0,
-                  shape: StadiumBorder(),
-                  fixedSize: Size(150, 40),
-                  backgroundColor: colors.blackTemp.withOpacity(0.8)
-              ),
-            ),
-          ],
-        ),
-      ),
+      // bottomSheet: Padding(
+      //   padding:  EdgeInsets.only(left: 10.0, right: 10),
+      //   child: Row(
+      //     mainAxisAlignment: MainAxisAlignment.center,
+      //     children: [
+      //       if (!isCheckedIn)
+      //         ElevatedButton(
+      //             onPressed: () async {
+      //               // punchIn();
+      //               setState(() {
+      //                 isCheckedIn = true;
+      //               });
+      //               monthlyDialog();
+      //               // var result = await   Navigator.push(context, MaterialPageRoute(builder: (context)=> CheckInScreen()));
+      //               // if(result != null){
+      //               //   setState(() {
+      //               //     punchIn();
+      //               //   });
+      //               // }
+      //              }, child: Text(getTranslated(context, 'PUNCHIN')!,
+      //             ),
+      //             style: ElevatedButton.styleFrom(
+      //                 elevation: 0,
+      //                 shape: StadiumBorder(),
+      //                 fixedSize: Size(150, 40),
+      //                 backgroundColor: colors.blackTemp.withOpacity(0.8)
+      //             )
+      //         ),
+      //       SizedBox(width: 10),
+      //     ],
+      //   ),
+      // ),
       // appBar: AppBar(
       //   centerTitle: true,
       //   elevation: 0,
@@ -442,10 +980,10 @@ class _HomePageState extends State<HomePage>
       // ),
       body: _isNetworkAvail
           ? RefreshIndicator(
-          color: colors.primary,
-          key: _refreshIndicatorKey,
-          onRefresh: _refresh,
-          child: SingleChildScrollView(
+        color: colors.primary,
+        key: _refreshIndicatorKey,
+        onRefresh: _refresh,
+        child: SingleChildScrollView(
           child: Padding(
             padding: const EdgeInsets.only(bottom: 15),
             child: Column(
@@ -454,93 +992,275 @@ class _HomePageState extends State<HomePage>
               children: [
                 getMarquees?.data?.status == "1"
                     ? Container(
-                        height: 40,
-                        width: MediaQuery.of(context).size.width,
-                        color: colors.primary,
-                        child: Marquee(
-                          text: '${getMarquees!.data?.title}',
-                          velocity: 50,
-                          scrollAxis: Axis.horizontal,
-                          blankSpace: 20,
-                          style: TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.w500,
-                              color: colors.whiteTemp),
-                        )):
-                // getMarquees?.data?.status == "1" ?
-                // Container(
-                //   height: 30,
-                //   color: Colors.red,
-                //   child: Padding(
-                //     padding: const EdgeInsets.only(top: 15),
-                //     child: Marquee(
-                //       text: 'test',
-                //       style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
-                //       scrollAxis: Axis.horizontal,
-                //       crossAxisAlignment: CrossAxisAlignment.start,
-                //       blankSpace: 20.0,
-                //       velocity: 100.0,
-                //       pauseAfterRound: Duration(seconds: 1),
-                //       startPadding: 10.0,
-                //       accelerationDuration: Duration(seconds: 1),
-                //       accelerationCurve: Curves.linear,
-                //       decelerationDuration: Duration(milliseconds: 500),
-                //       decelerationCurve: Curves.easeOut,
-                //     ),
-                //   ),
-                // ):
+                  height: 40,
+                  width: MediaQuery.of(context).size.width,
+                  color: colors.primary,
+                  child: Marquee(
+                      text: '${getMarquees!.data?.title}',
+                      velocity: 50,
+                      scrollAxis: Axis.horizontal,
+                      blankSpace: 20,
+                      style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.w500,
+                          color: colors.whiteTemp)),
+                ):
                 SizedBox(height: 10),
+                // timeLine(),
+                // SizedBox(height: 10),
                 // performanc
-                isCheckedIn ?
-                Container(
-                  height: 90,
-                  child: Card(
-                    elevation: 4,
-                    margin: EdgeInsets.all(8.0),
-                    child: Padding(
-                      padding: EdgeInsets.all(10.0),
-                      child: Column(
-                        children: [
-                          Column(
-                            children: [
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: <Widget>[
-                                  Text(getTranslated(context, 'STATUS')!), //
-                                  Text("${punchInModel?.data?.userStatus}"),
-                                ],
-                              ),
-                              SizedBox(height: 5),
+                // isCheckedIn ?
+                generalMsg?.data?.length == null || generalMsg?.data?.length == "" ? CircularProgressIndicator(color: Colors.white70,):
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+                  child: Container(
+                    height: generalMsg!.data!.length > 4
+                        ? MediaQuery.of(context).size.height/5.5
+                        : 100,
+                    width: MediaQuery.of(context).size.width/1,
+                    decoration: BoxDecoration(borderRadius: BorderRadius.circular(10), color: Colors.white),
+                    child: ListView.builder(
+                        itemCount: generalMsg?.data?.length ?? 0,
+                        itemBuilder: (c,  index) {
+                          return Padding(
+                              padding: const EdgeInsets.only(left: 10, right: 10,top: 7),
+                              child:
+                              generalMsg?.data?[index].status == '0' ?
                               Row(
                                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                 children: [
-                                  Text(getTranslated(context, 'CHECKOUTTIME')!),
-                                  Text("${punchInModel?.data?.punchoutTime}")
+                                  Container(
+                                      width: 190,
+                                      child: Text("${generalMsg?.data?[index].message}", overflow: TextOverflow.ellipsis,)),
+                                  InkWell(
+                                    onTap: () {
+                                      msgDialog(context, generalMsg?.data?[index].id.toString() ?? "");
+                                    },
+                                    child: Container(
+                                      height: 30,
+                                      width: 60,
+                                      decoration: BoxDecoration(borderRadius: BorderRadius.circular(5), color: colors.primary),
+                                      child: Center(
+                                          child: Text("View", style: TextStyle(fontSize: 13, color: Colors.white))),
+                                    ),
+                                  ),
                                 ],
-                              ),
-                              SizedBox(height: 9),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
+                              ): SizedBox()
+                          );
+                        }),
                   ),
-                ):
+                ),
+                SizedBox(height: 10),
                 customTabbar(),
                 SizedBox(height: 10),
+                taskdata.length == null || taskdata.length == "" ? CircularProgressIndicator(color: colors.white70,):
+                ListView.builder(
+                    shrinkWrap: true,
+                    physics:NeverScrollableScrollPhysics() ,
+                    itemCount: taskdata.length ?? 0,
+                    itemBuilder: (context, i) {
+                      return Padding(
+                        padding: const EdgeInsets.only(left: 10, right: 10),
+                        child: Card(
+                          elevation: 3,
+                          child: Container(
+                            height: 200,
+                            width: MediaQuery.of(context).size.width/1,
+                            decoration: BoxDecoration(borderRadius: BorderRadius.circular(10)),
+                            padding: EdgeInsets.all(10.0),
+                            child: Row(
+                              children: <Widget>[
+                                taskdata[i].taskType == "timeline" ?
+                                Padding(
+                                  padding: const EdgeInsets.only(top: 5),
+                                  child: Column(
+                                    children: [
+                                      Container(
+                                        height: 155,
+                                        width: 175,
+                                        decoration: BoxDecoration(borderRadius: BorderRadius.circular(5), color: Colors.red),
+                                        child: Center(
+                                            child: Text('${taskdata[i].title}', style: TextStyle(color: Colors.white, fontSize: 13))),
+                                      ),
+                                      Row(
+                                        children: [
+                                          Text("DeadLine: ", style: TextStyle(fontSize: 13)),
+                                          Text("${taskdata[i].dueDate}", style: TextStyle(fontSize: 13)),
+                                        ],
+                                      ),
+                                    ],
+                                  ),
+                                ): Padding(
+                                  padding: const EdgeInsets.only(top: 5),
+                                  child: Column(
+                                    children: [
+                                      Container(
+                                          height: 150,
+                                          width: 175,
+                                          decoration: BoxDecoration(borderRadius: BorderRadius.circular(5), color: colors.primary),
+                                          child: Center(
+                                              child: Text('${taskdata[i].title}', style: TextStyle(color: Colors.white, fontSize: 13)))),
+                                      Row(
+                                        children: [
+                                          Text("Type: ", style: TextStyle(fontSize: 13)),
+                                          Text("${taskdata[i].taskType}", style: TextStyle(fontSize: 13)),
+                                        ],
+                                      )
+                                    ],
+                                  ),
+                                ),
+                                SizedBox(width: 10),
+                                Expanded(
+                                  flex: 1,
+                                  child: Column(
+                                    children: <Widget>[
+                                      Container(
+                                        width: MediaQuery.of(context).size.width/1.8,
+                                        color: Colors.white,
+                                        child: Card(
+                                          elevation: 3,
+                                          child: DropdownButtonFormField<String>(
+                                            value: SelectedTask[i],
+                                            onChanged: (String? newValue) {
+                                              setState(() {
+                                                SelectedTask[i] = newValue!;
+
+                                              });
+                                            },
+                                            items: taskItem.map((String avaliableitem) {
+                                              return DropdownMenuItem(
+                                                value: avaliableitem,
+                                                child: Text(avaliableitem.toString()),
+                                              );
+                                            }).toList(),
+                                            decoration: InputDecoration(
+                                              border: InputBorder.none,
+                                              hintText: getTranslated(context, 'TASK_STATUS')!,
+                                              hintStyle: TextStyle(fontSize: 13),
+                                              filled: true,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                      Row(
+                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          Expanded(
+                                            child: InkWell(
+                                              onTap: () {
+                                                remarkDialog(
+                                                    context, taskdata[i].id.toString()
+                                                );
+                                              },
+                                              child: Container(
+                                                height: 50,
+                                                width: 20,
+                                                color: Colors.white,
+                                                child: Card(
+                                                    elevation: 3,
+                                                    child: Center(
+                                                        child: Text("Remark", style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: colors.primary),))
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                          Expanded(
+                                            child: InkWell(
+                                              onTap: () {
+                                                // fileDialog(
+                                                //   context,
+                                                // );
+                                                fileDialog(context, taskdata[i].id.toString());
+                                              },
+                                              child: Container(
+                                                  height: 50,
+                                                  width: 20,
+                                                  color: Colors.white,
+                                                  child: Card(
+                                                      elevation: 3,
+                                                      child: Center(
+                                                          child: Text("Attach", style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: colors.primary))))
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                      SizedBox(height: 10),
+                                      InkWell(
+                                        onTap: () {
+                                          updatTaskStatus(taskdata[i].id.toString());
+                                        },
+                                        child: Container(
+                                          height: 40,
+                                          width: MediaQuery.of(context).size.width/4.3,
+                                          decoration: BoxDecoration(borderRadius: BorderRadius.circular(5), color: colors.primary),
+                                          child: Center(
+                                            child: Text("Submit", style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white)),
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      );
+                    }),
+                SizedBox(height: 20),
+                _currentIndex == 2 ?
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.only(left: 5),
+                      child: InkWell(
+                        onTap: () {
+                          extensionDialog(context);
+                        },
+                        child: Container(
+                            height: 40,
+                            width: 120,
+                            decoration: BoxDecoration(borderRadius: BorderRadius.circular(30), color: Colors.black),
+                            child: Center(child: Text("Extension", style: TextStyle(color:  Colors.white, fontSize: 14)))),
+                      ),
+                    ),
+                    // if (isCheckedIn)
+                    widget.status == "1" ?
+                      Padding(
+                        padding: const EdgeInsets.only(right: 5),
+                        child: ElevatedButton(
+                          onPressed: () {
+                            punchOut();
+                            setState(() {
+                              isCheckedIn = false;
+                            });
+                            // Navigator.push(context, MaterialPageRoute(builder: (context)=> CheckOutScreen()));
+                          }, child: Text(getTranslated(context, 'PUNCHOUT')!),
+                          style: ElevatedButton.styleFrom(
+                              elevation: 0,
+                              shape: StadiumBorder(),
+                              fixedSize: Size(130, 40),
+                              backgroundColor: Colors.black
+                          ),
+                        ),
+                      ): SizedBox()
+                  ],
+                ): SizedBox()
                 // _deliverPincode(),
                 // _catList(),
                 // _firstHeader(),
-              // const SizedBox(height: 10,),
-              // _slider(),
-              // Padding(
-              //   padding: EdgeInsets.all(12),
-              //   child: Text("Assigned Task",
-              //     style: TextStyle(color: colors.primary, fontSize: 20, fontWeight: FontWeight.w600),
-              //   ),
-              // ),
-              _catList(),
-                const SizedBox(height: 25),
+                // const SizedBox(height: 10,),
+                // _slider(),
+                // Padding(
+                //   padding: EdgeInsets.all(12),
+                //   child: Text("Assigned Task",
+                //     style: TextStyle(color: colors.primary, fontSize: 20, fontWeight: FontWeight.w600),
+                //   ),
+                // ),
+                // _catList(),
+                //   const SizedBox(height: 25),
                 // Container(
                 //   margin: EdgeInsets.all(12),
                 //   child:  StaggeredGridView.countBuilder(
@@ -601,8 +1321,7 @@ class _HomePageState extends State<HomePage>
   }
 
   void _animateSlider() {
-    Future.delayed(Duration(seconds: 30)).then(
-          (_) {
+    Future.delayed(Duration(seconds: 30)).then((_) {
         if (mounted) {
           int nextPage = _controller.hasClients
               ? _controller.page!.round() + 1
@@ -814,7 +1533,7 @@ class _HomePageState extends State<HomePage>
                   // ),
                 ),
               )),
-            Text(
+          Text(
             subList[index].name! + "\n",
             textAlign: TextAlign.center,
             maxLines: 2,
@@ -830,13 +1549,13 @@ class _HomePageState extends State<HomePage>
               popularList[index].subList!.length == 0) {
             Navigator.push(
                 context, MaterialPageRoute(
-                  builder: (context) => ProductList(
-                    name: popularList[index].name,
-                    id: popularList[index].id,
-                    tag: false,
-                    fromSeller: false,
-                  ),
-                ));
+              builder: (context) => ProductList(
+                name: popularList[index].name,
+                id: popularList[index].id,
+                tag: false,
+                fromSeller: false,
+              ),
+            ));
           } else {
             Navigator.push(
                 context,
@@ -866,10 +1585,10 @@ class _HomePageState extends State<HomePage>
           Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => SubCategory(
-                  subList: subList[index].subList,
-                  title: subList[index].name ?? "",
-                )));
+                  builder: (context) => SubCategory(
+                    subList: subList[index].subList,
+                    title: subList[index].name ?? "",
+                  )));
         }
       },
     );
@@ -880,209 +1599,209 @@ class _HomePageState extends State<HomePage>
       builder: (context, data, child) {
         return data
             ? SingleChildScrollView(
-              child: Container(
+          child: Container(
               width: double.infinity,
               child: Shimmer.fromColors(
                   baseColor: Theme.of(context).colorScheme.simmerBase,
                   highlightColor: Theme.of(context).colorScheme.simmerHigh,
                   child: catLoading())),
-            )
-             : Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Container(
-                height: MediaQuery.of(context).size.height,
-                child:  ListView.builder(
+        )
+            : Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Container(
+              height: MediaQuery.of(context).size.height,
+              child:  ListView.builder(
                   physics: NeverScrollableScrollPhysics(),
-                itemCount: taskdata.length ?? 0 ,
-                 itemBuilder: (BuildContext context, int index) {
-                return InkWell(
-                  onTap: () {
-                    Navigator.push(context, MaterialPageRoute(builder: (context) => TaskDetails(model: taskdata[index])));
-                  },
-                  child:
-                  Container(
-                    height: 200,
-                    child: Card(
-                      elevation: 4,
-                      margin: EdgeInsets.all(8.0),
-                      child: Padding(
-                      padding: EdgeInsets.all(10.0),
-                      child: Column(
-                        children: [
-                          Text("${taskdata[index].title}", style: TextStyle(fontSize: 12, color:colors.primary, fontWeight: FontWeight.w600),),
-                          SizedBox(height: 9),
-                          Column(
-                            children: [
-                              Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: <Widget>[
-                              Text(getTranslated(context, 'ASSIGNDATE')!), //
-                               Text("${taskdata[index].dateCreated}"),
+                  itemCount: taskdata.length ?? 0 ,
+                  itemBuilder: (BuildContext context, int index) {
+                    return InkWell(
+                      onTap: () {
+                        Navigator.push(context, MaterialPageRoute(builder: (context) => TaskDetails(model: taskdata[index])));
+                      },
+                      child:
+                      Container(
+                        height: 200,
+                        child: Card(
+                          elevation: 4,
+                          margin: EdgeInsets.all(8.0),
+                          child: Padding(
+                            padding: EdgeInsets.all(10.0),
+                            child: Column(
+                              children: [
+                                Text("${taskdata[index].title}", style: TextStyle(fontSize: 12, color:colors.primary, fontWeight: FontWeight.w600),),
+                                SizedBox(height: 9),
+                                Column(
+                                  children: [
+                                    Row(
+                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                      children: <Widget>[
+                                        Text(getTranslated(context, 'ASSIGNDATE')!), //
+                                        Text("${taskdata[index].dateCreated}"),
+                                      ],
+                                    ),
+                                    SizedBox(height: 5),
+                                    Row(
+                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Text(getTranslated(context, 'DUEDATE')!),
+                                        Text("${taskdata[index].dueDate}")
+                                      ],
+                                    ),
+                                    SizedBox(height: 9),
+                                    Row(
+                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Text(getTranslated(context, 'DESCRIPTION')!),
+                                        Container(child: Text("${taskdata[index].description}", overflow: TextOverflow.ellipsis))
+                                      ],
+                                    ),
+                                    SizedBox(height: 9),
+                                    Row(
+                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Text(getTranslated(context, 'ASSIGNEDTEAM')!),
+                                        Text(getTranslated(context, 'CREADTEDTEAM')!),
+                                      ],
+                                    ),
+                                    SizedBox(height: 9),
+                                    Row(
+                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Text("${taskdata[index].taskCreator}"),
+                                        Text("${taskdata[index].users}"),
+                                      ],
+                                    ),
+                                  ],
+                                ),
                               ],
-                               ),
-                              SizedBox(height: 5),
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Text(getTranslated(context, 'DUEDATE')!),
-                                  Text("${taskdata[index].dueDate}")
-                                ],
-                              ),
-                              SizedBox(height: 9),
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Text(getTranslated(context, 'DESCRIPTION')!),
-                                  Container(child: Text("${taskdata[index].description}", overflow: TextOverflow.ellipsis))
-                                ],
-                              ),
-                              SizedBox(height: 9),
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Text(getTranslated(context, 'ASSIGNEDTEAM')!),
-                                  Text(getTranslated(context, 'CREADTEDTEAM')!),
-                                ],
-                              ),
-                              SizedBox(height: 9),
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Text("${taskdata[index].taskCreator}"),
-                                  Text("${taskdata[index].users}"),
-                                ],
-                              ),
-                            ],
+                            ),
                           ),
-                        ],
+                        ),
                       ),
-                    ),
-                   ),
-                  ),
-                );
-        //         GridView.builder(
-        //         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-        //           crossAxisCount: 2),
-        //         itemCount: taskdata.length <20 ? taskdata.length : 20,
-        //           scrollDirection: Axis.vertical,
-        //          shrinkWrap: true,
-        //           physics: NeverScrollableScrollPhysics(),
-        //          itemBuilder: (context, index) {
-        //         // catId = catList[index].id;
-        //         // if (index == 0)
-        //         //   return Container();
-        //         // else
-        //         return GestureDetector(
-        //           onTap: () async {
-        //             Navigator.push(context, MaterialPageRoute(builder: (context) => AddExpenseScreen(
-        //               data: catList[index],
-        //               isUpdate: false,
-        //             ),
-        //             ),
-        //             );
-        //             // onTap: () async {
-        //             //   Navigator.push(context, MaterialPageRoute(builder: (context) => ReferForm(
-        //             //     data: catList[index],
-        //             //   )));
-        //             // if (catList[index].subList == null ||
-        //             //     catList[index].subList!.length == 0) {
-        //             //   await Navigator.push(
-        //             //       context,
-        //             //       MaterialPageRoute(
-        //             //         builder: (context) => ProductList(
-        //             //           name: catList[index].name,
-        //             //           id: catList[index].id,
-        //             //           tag: false,
-        //             //           fromSeller: false,
-        //             //         ),
-        //             //       ));
-        //             // } else {
-        //             //   await Navigator.push(
-        //             //       context,
-        //             //       MaterialPageRoute(
-        //             //         builder: (context) => SubCategory(
-        //             //           title: catList[index].name!,
-        //             //           subList: catList[index].subList,
-        //             //           catId: catList[index].id,
-        //             //         ),
-        //             //       ));
-        //             // }
-        //           },
-        //           child: Padding(
-        //             padding: const EdgeInsets.all(5.0),
-        //             child: Container(
-        //               decoration: BoxDecoration(
-        //                 border: Border.all(color: colors.primary),
-        //                 borderRadius: BorderRadius.circular(10)
-        //               ),
-        //               child: Column(
-        //                 mainAxisAlignment: MainAxisAlignment.center,
-        //                 crossAxisAlignment: CrossAxisAlignment.center,
-        //                 // mainAxisSize: MainAxisSize.min,
-        //                 children: <Widget>[
-        //                   // Padding(
-        //                   // padding: EdgeInsets.all(10),
-        //                   //   child: new ClipRRect(
-        //                   //     borderRadius: BorderRadius.circular(15.0),
-        //                   //     child: new FadeInImage(
-        //                   //       fadeInDuration: Duration(milliseconds: 150),
-        //                   //       image: CachedNetworkImageProvider(
-        //                   //         catList[index].image!,
-        //                   //       ),
-        //                   //       height: 100.0,
-        //                   //       width: 100,
-        //                   //       fit: BoxFit.fill,
-        //                   //       imageErrorBuilder:
-        //                   //           (context, error, stackTrace) =>
-        //                   //           erroWidget(50),
-        //                   //       placeholder: placeHolder(50),
-        //                   //     ),
-        //                   //   ),
-        //                   // ),
-        //                   // const SizedBox(width: 20,),
-        //                   Container(
-        //                     height: 40,
-        //                     decoration: BoxDecoration(
-        //                       color: colors.primary,
-        //                         borderRadius: BorderRadius.only(bottomLeft: Radius.circular(10), bottomRight: Radius.circular(10))
-        //                     ),
-        //                     width: MediaQuery.of(context).size.width,
-        //                     child: Center(
-        //                       child: Text(
-        //                         taskdata[index].title!,
-        //                         style: TextStyle(
-        //                           color: colors.whiteTemp,
-        //                             fontSize: 13, fontWeight: FontWeight.w600
-        //                         ),
-        //                         // Theme.of(context)
-        //                         //     .textTheme
-        //                         //     .bodyText1!
-        //                         //     .copyWith(
-        //                         //         color: Theme.of(context)
-        //                         //             .colorScheme
-        //                         //             .fontColor,
-        //                         //         fontWeight: FontWeight.w700,
-        //                         //         fontSize: 14),
-        //                         overflow: TextOverflow.ellipsis,
-        //                         textAlign: TextAlign.center,
-        //                       ),
-        //                     ),
-        //                     // width: 50,
-        //                   ),
-        //                   Row(
-        //                     children: [
-        //                       Text("Date Created"),
-        //                       Text("${taskdata[index].dateCreated}")
-        //                     ],
-        //                   ),
-        //                 ],
-        //               ),
-        //             ),
-        //           ),
-        //         );
-        //   },
-        // ),
-        })),
+                    );
+                    //         GridView.builder(
+                    //         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    //           crossAxisCount: 2),
+                    //         itemCount: taskdata.length <20 ? taskdata.length : 20,
+                    //           scrollDirection: Axis.vertical,
+                    //          shrinkWrap: true,
+                    //           physics: NeverScrollableScrollPhysics(),
+                    //          itemBuilder: (context, index) {
+                    //         // catId = catList[index].id;
+                    //         // if (index == 0)
+                    //         //   return Container();
+                    //         // else
+                    //         return GestureDetector(
+                    //           onTap: () async {
+                    //             Navigator.push(context, MaterialPageRoute(builder: (context) => AddExpenseScreen(
+                    //               data: catList[index],
+                    //               isUpdate: false,
+                    //             ),
+                    //             ),
+                    //             );
+                    //             // onTap: () async {
+                    //             //   Navigator.push(context, MaterialPageRoute(builder: (context) => ReferForm(
+                    //             //     data: catList[index],
+                    //             //   )));
+                    //             // if (catList[index].subList == null ||
+                    //             //     catList[index].subList!.length == 0) {
+                    //             //   await Navigator.push(
+                    //             //       context,
+                    //             //       MaterialPageRoute(
+                    //             //         builder: (context) => ProductList(
+                    //             //           name: catList[index].name,
+                    //             //           id: catList[index].id,
+                    //             //           tag: false,
+                    //             //           fromSeller: false,
+                    //             //         ),
+                    //             //       ));
+                    //             // } else {
+                    //             //   await Navigator.push(
+                    //             //       context,
+                    //             //       MaterialPageRoute(
+                    //             //         builder: (context) => SubCategory(
+                    //             //           title: catList[index].name!,
+                    //             //           subList: catList[index].subList,
+                    //             //           catId: catList[index].id,
+                    //             //         ),
+                    //             //       ));
+                    //             // }
+                    //           },
+                    //           child: Padding(
+                    //             padding: const EdgeInsets.all(5.0),
+                    //             child: Container(
+                    //               decoration: BoxDecoration(
+                    //                 border: Border.all(color: colors.primary),
+                    //                 borderRadius: BorderRadius.circular(10)
+                    //               ),
+                    //               child: Column(
+                    //                 mainAxisAlignment: MainAxisAlignment.center,
+                    //                 crossAxisAlignment: CrossAxisAlignment.center,
+                    //                 // mainAxisSize: MainAxisSize.min,
+                    //                 children: <Widget>[
+                    //                   // Padding(
+                    //                   // padding: EdgeInsets.all(10),
+                    //                   //   child: new ClipRRect(
+                    //                   //     borderRadius: BorderRadius.circular(15.0),
+                    //                   //     child: new FadeInImage(
+                    //                   //       fadeInDuration: Duration(milliseconds: 150),
+                    //                   //       image: CachedNetworkImageProvider(
+                    //                   //         catList[index].image!,
+                    //                   //       ),
+                    //                   //       height: 100.0,
+                    //                   //       width: 100,
+                    //                   //       fit: BoxFit.fill,
+                    //                   //       imageErrorBuilder:
+                    //                   //           (context, error, stackTrace) =>
+                    //                   //           erroWidget(50),
+                    //                   //       placeholder: placeHolder(50),
+                    //                   //     ),
+                    //                   //   ),
+                    //                   // ),
+                    //                   // const SizedBox(width: 20,),
+                    //                   Container(
+                    //                     height: 40,
+                    //                     decoration: BoxDecoration(
+                    //                       color: colors.primary,
+                    //                         borderRadius: BorderRadius.only(bottomLeft: Radius.circular(10), bottomRight: Radius.circular(10))
+                    //                     ),
+                    //                     width: MediaQuery.of(context).size.width,
+                    //                     child: Center(
+                    //                       child: Text(
+                    //                         taskdata[index].title!,
+                    //                         style: TextStyle(
+                    //                           color: colors.whiteTemp,
+                    //                             fontSize: 13, fontWeight: FontWeight.w600
+                    //                         ),
+                    //                         // Theme.of(context)
+                    //                         //     .textTheme
+                    //                         //     .bodyText1!
+                    //                         //     .copyWith(
+                    //                         //         color: Theme.of(context)
+                    //                         //             .colorScheme
+                    //                         //             .fontColor,
+                    //                         //         fontWeight: FontWeight.w700,
+                    //                         //         fontSize: 14),
+                    //                         overflow: TextOverflow.ellipsis,
+                    //                         textAlign: TextAlign.center,
+                    //                       ),
+                    //                     ),
+                    //                     // width: 50,
+                    //                   ),
+                    //                   Row(
+                    //                     children: [
+                    //                       Text("Date Created"),
+                    //                       Text("${taskdata[index].dateCreated}")
+                    //                     ],
+                    //                   ),
+                    //                 ],
+                    //               ),
+                    //             ),
+                    //           ),
+                    //         );
+                    //   },
+                    // ),
+                  })),
         );
       },
       selector: (_, homeProvider) => homeProvider.catLoading,
@@ -1112,27 +1831,26 @@ class _HomePageState extends State<HomePage>
               child: Container(
                 decoration: BoxDecoration(
                     color: _currentIndex == 1 ?
-                    colors.primary
-                        : colors.primary.withOpacity(0.2),
+                    colors.primary : colors.primary.withOpacity(0.2),
                     borderRadius: BorderRadius.circular(5)
                 ),
                 height: 40,
-                width: 110,
+                width: 134,
                 child: Center(
                   child: Row(
                     children: [
                       Padding(
-                        padding: const EdgeInsets.only(left: 3),
-                        child: Text(getTranslated(context, 'COMPLETETASK')!,style: TextStyle(color: _currentIndex == 1 ? colors.whiteTemp:colors.blackTemp,fontSize: 12)),
+                        padding: const EdgeInsets.only(left: 5),
+                        child: Text(getTranslated(context, 'COMPLETETASK')!,style: TextStyle(color: _currentIndex == 1 ? colors.whiteTemp:colors.blackTemp,fontSize: 14)),
                       ),
-                      SizedBox(width: 4,),
-                      Text("${taskCountModel?.data?.completeTasks}",style: TextStyle(color: _currentIndex == 1 ? colors.whiteTemp:colors.blackTemp,fontSize: 12)),
+                      SizedBox(width: 4),
+                      Text("${taskCountModel?.data?.completeTasks}", style: TextStyle(color: _currentIndex == 1 ? colors.whiteTemp:colors.blackTemp,fontSize: 14)),
                     ],
                   ),
                 ),
               ),
             ),
-            SizedBox(width:10),
+            SizedBox(width:20),
             InkWell(
               onTap: () {
                 setState(() {
@@ -1159,50 +1877,50 @@ class _HomePageState extends State<HomePage>
                     children: [
                       Padding(
                         padding: const EdgeInsets.only(left: 7),
-                        child: Text(getTranslated(context, 'PENDINGTASK')!,style: TextStyle(color: _currentIndex == 2 ? colors.whiteTemp:colors.blackTemp,fontSize: 13)),
+                        child: Text(getTranslated(context, 'PENDINGTASK')!,style: TextStyle(color: _currentIndex == 2 ? colors.whiteTemp:colors.blackTemp,fontSize: 14)),
                       ),
                       SizedBox(width: 10),
-                      Text("${taskCountModel?.data?.pendingTask}",style: TextStyle(color: _currentIndex == 2 ? colors.whiteTemp:colors.blackTemp,fontSize: 13)),
+                      Text("${taskCountModel?.data?.pendingTask}",style: TextStyle(color: _currentIndex == 2 ? colors.whiteTemp:colors.blackTemp,fontSize: 14)),
                     ],
                   ),
                 ),
               ),
             ),
             SizedBox(width:10),
-            InkWell(
-              onTap: () {
-                setState(() {
-                  _currentIndex = 3;
-                  getTaskList("");
-                  // Navigator.push(context, MaterialPageRoute(builder: (context)=>ReportScreen()));
-                });
-              },
-              child: Padding(
-                padding: const EdgeInsets.all(2.0),
-                child: Container(
-                  decoration: BoxDecoration(
-                      color: _currentIndex == 3 ?
-                      colors.primary : colors.primary.withOpacity(0.2),
-                      borderRadius: BorderRadius.circular(5)
-                  ),
-                  // width: 120,
-                  height: 40,
-                  width: 83,
-                  child: Center(
-                    child: Row(
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.only(left: 5),
-                          child: Text(getTranslated(context, 'TOTALTASK')!,style: TextStyle(color: _currentIndex == 3 ? colors.whiteTemp:colors.blackTemp,fontSize: 12)),
-                        ),
-                        SizedBox(width: 6),
-                        Text("${taskCountModel?.data?.allTasks}", style: TextStyle(color: _currentIndex == 3 ? colors.whiteTemp:colors.blackTemp,fontSize: 12)),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-            ),
+            // InkWell(
+            //   onTap: () {
+            //     setState(() {
+            //       _currentIndex = 3;
+            //       getTaskList("");
+            //       // Navigator.push(context, MaterialPageRoute(builder: (context)=>ReportScreen()));
+            //     });
+            //   },
+            //   child: Padding(
+            //     padding: const EdgeInsets.all(2.0),
+            //     child: Container(
+            //       decoration: BoxDecoration(
+            //           color: _currentIndex == 3 ?
+            //           colors.primary : colors.primary.withOpacity(0.2),
+            //           borderRadius: BorderRadius.circular(5)
+            //       ),
+            //       // width: 120,
+            //       height: 40,
+            //       width: 83,
+            //       child: Center(
+            //         child: Row(
+            //           children: [
+            //             Padding(
+            //               padding: const EdgeInsets.only(left: 5),
+            //               child: Text(getTranslated(context, 'TOTALTASK')!,style: TextStyle(color: _currentIndex == 3 ? colors.whiteTemp:colors.blackTemp,fontSize: 12)),
+            //             ),
+            //             SizedBox(width: 6),
+            //             Text("${taskCountModel?.data?.allTasks}", style: TextStyle(color: _currentIndex == 3 ? colors.whiteTemp:colors.blackTemp,fontSize: 12)),
+            //           ],
+            //         ),
+            //       ),
+            //     ),
+            //   ),
+            // ),
           ],
         ),
       ),
@@ -1238,6 +1956,7 @@ class _HomePageState extends State<HomePage>
     user.setUserId(setting.userId);
     _isNetworkAvail = await isNetworkAvailable();
     if (_isNetworkAvail) {
+      generalMessage();
       convertDateTimeDispla();
       showText();
       taskCount();

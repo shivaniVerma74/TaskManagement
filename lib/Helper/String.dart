@@ -18,6 +18,11 @@ final Uri addFile = Uri.parse(baseUrl + 'add_file');
 final Uri updatePrfile = Uri.parse(baseUrl + 'update_profile');
 final Uri marquee = Uri.parse(baseUrl + 'get_marquee');
 final Uri getFiles = Uri.parse(baseUrl + 'get_files');
+final Uri getFaqs = Uri.parse(baseUrl + 'get_faqs');
+final Uri readMessage = Uri.parse(baseUrl + 'read_message');
+final Uri termConditions = Uri.parse(baseUrl + 'get_terms_conditions');
+final Uri getGeneralMessage = Uri.parse(baseUrl + 'get_users_message');
+
 
 final Uri getSectionApi = Uri.parse(baseUrl + 'get_sections');
 final Uri getSettingApi = Uri.parse(baseUrl + 'get_settings');

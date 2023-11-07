@@ -21,6 +21,7 @@ import '../Helper/AppBtn.dart';
 import '../Helper/Color.dart';
 import '../Helper/Constant.dart';
 import '../Helper/Session.dart';
+import 'check_In_screen.dart';
 
 class LoginPage extends StatefulWidget {
   @override
@@ -215,8 +216,9 @@ class _LoginPagePageState extends State<LoginPage> with TickerProviderStateMixin
       userProvider.setProfilePic(image ?? "");
       SettingProvider settingProvider = Provider.of<SettingProvider>(context, listen: false);
       settingProvider.saveUserDetail(id!, username, email, mobile, city, area, address, pincode, latitude, longitude, image, context);
-      setPrefrenceBool(ISFIRSTTIME, false);
-      Navigator.pushNamedAndRemoveUntil(context, "/home", (r) => false);
+      // setPrefrenceBool(ISFIRSTTIME, false);
+      // Navigator.pushNamedAndRemoveUntil(context, "/home", (r) => false);
+      Navigator.push(context, MaterialPageRoute(builder: (context) => CheckInScreen()));
       // Navigator.push(context, MaterialPageRoute(builder: (context) => VerifyOtp(mobileNumber: mobile.toString(), otp: otp.toString())));
     }
     else {
@@ -279,11 +281,11 @@ class _LoginPagePageState extends State<LoginPage> with TickerProviderStateMixin
         decoration: InputDecoration(
           counterText: "",
           prefixIcon: Icon(
-            Icons.email,
+            Icons.person,
             color: Theme.of(context).colorScheme.fontColor,
             size: 20,
           ),
-          hintText: "Email",
+          hintText: "UserName",
           hintStyle: Theme.of(this.context).textTheme.subtitle2!.copyWith(
               color: Theme.of(context).colorScheme.fontColor,
               fontWeight: FontWeight.normal),

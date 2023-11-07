@@ -162,7 +162,7 @@ class _MyAppState extends State<MyApp> {
               Locale("es", "ES"),
               Locale("hi", "IN"),
               Locale("ar", "DZ"),
-              Locale("ru", "RU"),
+              // Locale("bn", ""),
               Locale("ja", "JP"),
               Locale("de", "DE")
             ],
@@ -172,6 +172,7 @@ class _MyAppState extends State<MyApp> {
               GlobalMaterialLocalizations.delegate,
               GlobalWidgetsLocalizations.delegate,
               GlobalCupertinoLocalizations.delegate,
+             // LocalJsonLocalization.delegate,
             ],
             localeResolutionCallback: (locale, supportedLocales) {
               for (var supportedLocale in supportedLocales) {

@@ -134,7 +134,7 @@ class _PerformaceTrackingState extends State<PerformaceTracking> {
         : Padding(
         padding: const EdgeInsets.only(top: 10.0),
         child: Container(
-        height: 180,
+        height: 195,
         child: Card(
           elevation: 4,
           margin: EdgeInsets.symmetric(horizontal: 20, vertical: 5),
@@ -160,6 +160,8 @@ class _PerformaceTrackingState extends State<PerformaceTracking> {
                           SizedBox(height:10),
                           Text(getTranslated(context, 'PENDINGTASK')!, style: TextStyle(color:colors.blackTemp,fontWeight: FontWeight.bold)),
                           SizedBox(height:10),
+                          Text("Percentage", style: TextStyle(color:colors.blackTemp,fontWeight: FontWeight.bold)),
+                          SizedBox(height: 10),
                         ],
                       ),
                       SizedBox(width: 40),
@@ -168,13 +170,15 @@ class _PerformaceTrackingState extends State<PerformaceTracking> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text('${performancedata?.message}',overflow: TextOverflow.ellipsis,maxLines:1),
+                            Text('${performancedata?.message}',overflow: TextOverflow.ellipsis,maxLines: 1),
                             SizedBox(height: 10),
                             Text('${performancedata?.data?.totalTasks}',overflow: TextOverflow.ellipsis,maxLines: 2),
                             SizedBox(height: 10),
                             Text('${performancedata?.data?.completedTask}',overflow: TextOverflow.ellipsis,maxLines: 2),
                             SizedBox(height: 10),
-                            Text('${performancedata?.data?.pendingTask}',overflow: TextOverflow.ellipsis,maxLines:3),
+                            Text('${performancedata?.data?.pendingTask}',overflow: TextOverflow.ellipsis,maxLines: 3),
+                            SizedBox(height: 10),
+                            Text('${performancedata?.data?.pendingTask}',overflow: TextOverflow.ellipsis,maxLines: 3),
                             SizedBox(height: 10),
                           ],
                         ),
